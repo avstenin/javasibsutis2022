@@ -1,17 +1,19 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class DNSAnalyzer
-{
-    private HashMap<String, String> timeStatistic;
+public class DNSAnalyzer {
+    private LinkedHashMap<String, String> testResults;
 
-    public DNSAnalyzer startTest() throws Exception{
+    DNSAnalyzer(){
+        testResults = new LinkedHashMap<>();
+    }
+
+    public DNSAnalyzer startTest() throws Exception {
         greet();
-        timeStatistic = measurePing();
+        measurePing();
+        sortInDescendingOrder();
         return this;
     }
 
@@ -19,7 +21,7 @@ public class DNSAnalyzer
         System.out.println("Введите 3 DNS адреса для вычисления задержки до них:");
     }
 
-    private  ArrayList<String> scanAddresses() {
+    private ArrayList<String> scanAddresses() {
         ArrayList<String> addresses = new ArrayList<>();
 
         Scanner scanner = new Scanner(System.in);
@@ -45,13 +47,10 @@ public class DNSAnalyzer
         }
     }
 
-    private HashMap<String, String> measurePing() throws Exception {
-
+    private void measurePing() throws Exception {
         var addresses = scanAddresses();
 
         var builder = new ProcessBuilder().redirectErrorStream(true);
-
-        var outputStrings = new HashMap<String, String>();
 
         for (var address : addresses) {
             var command = generateCommand(address);
@@ -59,27 +58,38 @@ public class DNSAnalyzer
             var process = builder.start();
             var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-            String line;
+            String timeToHost;
             while (true) {
-                line = reader.readLine();
-                if (line == null)
+                timeToHost = reader.readLine();
+                if (timeToHost == null)
                     break;
 
-                if (!line.startsWith("ping") && !line.startsWith("0"))
-                    outputStrings.put(address, line);
+                if (!timeToHost.startsWith("ping") && !timeToHost.startsWith("0"))
+                    testResults.put(address, timeToHost);
             }
         }
-        return outputStrings;
     }
 
-    public void printTopTimes() {
-        if (timeStatistic.isEmpty()) {
+    public void sortInDescendingOrder() {
+        testResults = testResults.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new
+                ));
+    }
+
+    public DNSAnalyzer printTopTimes() {
+        if (testResults.isEmpty()) {
             System.out.println("Не удалось вычислить пинг.");
-            return;
+            return this;
         }
 
-        for (var row : timeStatistic.entrySet()) {
+        for (var row : testResults.entrySet())
             System.out.printf("%15s  -  %6s\n", row.getKey(), row.getValue());
-        }
+        return this;
     }
 }
