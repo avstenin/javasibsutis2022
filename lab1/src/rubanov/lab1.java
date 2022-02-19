@@ -1,7 +1,8 @@
+package lab1.src.rubanov;
+
 import java.io.IOException;
 
 public class lab1 {
-
     public static void main(String[] args) throws Exception {
         try {
             var test = new DNSAnalyzer().startTest().printTopTimes();

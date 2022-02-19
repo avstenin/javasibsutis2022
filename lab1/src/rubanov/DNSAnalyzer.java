@@ -1,3 +1,5 @@
+package lab1.src.rubanov;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
