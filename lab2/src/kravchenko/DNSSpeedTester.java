@@ -6,9 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Scanner;
+import java.util.*;
 
 class DNSTime implements Comparable<DNSTime> {
     private final String ip;
@@ -36,6 +34,7 @@ public class DNSSpeedTester {
     final private static byte dnsPort = 53;
     final private static short timeout = 5000;
     ArrayList<DNSTime> dnsList = new ArrayList<>();
+    Set<String> dnsSet = new HashSet<>();
 
     private double getAverageConnectionTime(String ip) {
         byte requests = 10;
@@ -66,6 +65,10 @@ public class DNSSpeedTester {
             System.out.println("Enter " + dnsIndex + " address:");
             System.out.print(">");
             String ip = input.next();
+            if (dnsSet.contains(ip))
+                continue;
+            else
+                dnsSet.add(ip);
             double connectionTime = getAverageConnectionTime(ip);
             if (connectionTime != -1) dnsList.add(new DNSTime(ip, dnsIndex, connectionTime));
         }
