@@ -87,7 +87,7 @@ public final class PingTimeMeasure {
                 return exitSuccess;
             }
         }
-        
+
         if (packetsReceived == 0) {
             System.out.println("Запросы на сервер '" + ip + "' остались безответными. Сервер пропущен.");
             return exitSuccess;
@@ -112,6 +112,9 @@ public final class PingTimeMeasure {
     }
 
     public static void writeToFile(String destination) {
+        if (connectionTime.isEmpty())
+            return;
+        
         try (PrintWriter out = new PrintWriter(destination)) {
             for (PingResult res : connectionTime) {
                 out.println(res.ip() + ";" + res.time());
