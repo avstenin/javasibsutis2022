@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -40,7 +41,7 @@ class PingResult {
 }
 
 public final class PingTimeMeasure {
-    private static ArrayList<PingResult> connectionTime = new ArrayList<PingResult>();
+    private static ArrayList<PingResult> queriesLog = new ArrayList<PingResult>();
     private final static int packetNum = 5;
 
     private PingTimeMeasure() {}
@@ -53,31 +54,35 @@ public final class PingTimeMeasure {
         return match.group(1);
     }
 
-    public static void readCsv(String path)
-    throws IOException
+    public static PingResult findQuery(String ip)
     {
-        File csvData = new File(path);
+        return queriesLog.stream()
+                             .filter( query -> ip.equals( query.ip() ) )
+                             .findAny()
+                             .orElse(null);
+    }
+
+    public static void readCsv(Path path)
+    throws IOException {
+        File csvData = path.toFile();
         if (!csvData.exists() || csvData.isDirectory())
             return;
         
         try (CSVParser parser = CSVParser.parse(csvData, Charset.defaultCharset(), CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").build()))
         {
             for (CSVRecord csvRecord : parser) {
-                connectionTime.add(new PingResult(csvRecord.get(0), Double.parseDouble(csvRecord.get(1))));
+                String ip = csvRecord.get(0);
+                if (findQuery(ip) == null)
+                    queriesLog.add(new PingResult(ip, Double.parseDouble(csvRecord.get(1))));
             }
         }
-    }
-
-    public static PingResult findQuery(String ip)
-    {
-        return connectionTime.stream().filter(query -> ip.equals(query.ip())).findAny().orElse(null);
     }
 
     public static void remove(String ip)
     {
         var query = findQuery(ip);
         if (query != null)
-            connectionTime.remove(query);
+            queriesLog.remove(query);
     }
 
     public static int add(String ip)
@@ -120,24 +125,27 @@ public final class PingTimeMeasure {
         totalTimeMs /= packetsReceived;
 
         PingResult res = new PingResult(ip, totalTimeMs);
-        connectionTime.add(res);
-        Collections.sort(connectionTime, Comparator.comparing(PingResult::time).reversed());
+        queriesLog.add(res);
+        Collections.sort(queriesLog, Comparator.comparing(PingResult::time).reversed());
 
         return exitSuccess;
     }
 
     public static void print() {
-        for (PingResult res : connectionTime) {
+        for (PingResult res : queriesLog) {
             res.print();
         }
     }
 
     public static void writeToFile(String destination) {
-        if (connectionTime.isEmpty())
+        if (queriesLog.isEmpty() || destination.isEmpty())
             return;
-        
+
+        File parentFolder = new File(destination).getAbsoluteFile().getParentFile();
+        parentFolder.mkdirs();
+
         try (PrintWriter out = new PrintWriter(destination)) {
-            for (PingResult res : connectionTime) {
+            for (PingResult res : queriesLog) {
                 out.println(res.ip() + ";" + res.time());
             }
         } catch (FileNotFoundException e) {
