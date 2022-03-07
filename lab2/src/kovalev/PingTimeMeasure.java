@@ -61,11 +61,20 @@ public final class PingTimeMeasure {
                 Double timeMs = Double.parseDouble(timeMsString);
                 totalTimeMs += timeMs;
             }
+            else if (s.contains("could not find host") || s.contains("Name or service not known")) {
+                System.out.println("Не удалось найти сервер по адресу '" + ip + "'. Сервер пропущен.");
+                return exitSuccess;
+            }
+            else if (s.contains("Destination Host Unreachable") || s.contains("Destination host unreachable") || s.contains("Request timed out") || s.contains("100% packet loss")) {
+                System.out.println("Запрос на сервер '" + ip + "' остался безответным. Сервер пропущен.");
+                return exitSuccess;
+            }
         }
         totalTimeMs /= packetNum;
         PingResult res = new PingResult(ip, totalTimeMs);
         connectionTime.add(res);
         Collections.sort(connectionTime, Comparator.comparing(PingResult::time).reversed());
+
         return exitSuccess;
     }
 
