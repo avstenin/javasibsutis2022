@@ -39,11 +39,24 @@ public final class PingTimeMeasure {
 
     private PingTimeMeasure() {}
 
-    private static String extractValue(String str, String key) {
+    private static String extractValue(String str, String key)
+    {
         Pattern p = Pattern.compile(".*" + key + "=([0-9]+)");
         Matcher match = p.matcher(str);
         match.find();
         return match.group(1);
+    }
+
+    public static PingResult findQuery(String ip)
+    {
+        return connectionTime.stream().filter(query -> ip.equals(query.ip())).findAny().orElse(null);
+    }
+
+    public static void remove(String ip)
+    {
+        var query = findQuery(ip);
+        if (query != null)
+            connectionTime.remove(query);
     }
 
     public static int add(String ip)
