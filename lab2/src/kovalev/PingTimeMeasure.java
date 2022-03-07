@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,6 +26,10 @@ class PingResult {
 
     public Double time() {
         return time;
+    }
+
+    public String ip() {
+        return ip;
     }
 }
 
@@ -81,6 +87,16 @@ public final class PingTimeMeasure {
     public static void print() {
         for (PingResult res : connectionTime) {
             res.print();
+        }
+    }
+
+    public static void writeToFile(String destination) {
+        try (PrintWriter out = new PrintWriter(destination)) {
+            for (PingResult res : connectionTime) {
+                out.println(res.ip() + ";" + res.time());
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Ошибка записи в файл '" + destination + "'!");
         }
     }
 }

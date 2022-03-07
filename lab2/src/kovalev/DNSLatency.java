@@ -16,7 +16,7 @@ public class DNSLatency {
                     System.out.println("Введите корректное число!");
                 }
             }
-            
+
             for (int i = 1; i <= ipQueryNum; i++) {
                 System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
                 String ip = scanner.next();
@@ -31,5 +31,6 @@ public class DNSLatency {
         }
 
         PingTimeMeasure.print();
+        PingTimeMeasure.writeToFile("DNSQueries.csv");
     }
 }
