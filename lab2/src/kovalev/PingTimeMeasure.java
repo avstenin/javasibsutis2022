@@ -1,13 +1,19 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 class PingResult {
     private String ip;
@@ -45,6 +51,21 @@ public final class PingTimeMeasure {
         Matcher match = p.matcher(str);
         match.find();
         return match.group(1);
+    }
+
+    public static void readCsv(String path)
+    throws IOException
+    {
+        File csvData = new File(path);
+        if (!csvData.exists() || csvData.isDirectory())
+            return;
+        
+        try (CSVParser parser = CSVParser.parse(csvData, Charset.defaultCharset(), CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").build()))
+        {
+            for (CSVRecord csvRecord : parser) {
+                connectionTime.add(new PingResult(csvRecord.get(0), Double.parseDouble(csvRecord.get(1))));
+            }
+        }
     }
 
     public static PingResult findQuery(String ip)

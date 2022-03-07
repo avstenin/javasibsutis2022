@@ -5,6 +5,8 @@ import java.util.Scanner;
 public class DNSLatency {
     public static void main(String[] args)
     throws IOException {
+        PingTimeMeasure.readCsv("DNSQueries.csv");
+
         try (Scanner scanner = new Scanner(System.in)) {
             int ipQueryNum;
             System.out.println("Введите число серверов DNS:");
