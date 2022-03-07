@@ -9,22 +9,26 @@ public class lab2 {
 
   public static void main(String[] args) throws IOException
   {
-      System.out.println("Enter 3 DNS-servers:");
+      System.out.println("Enter amount of DNS-servers:");
 
       ArrayList<String> DnsAddres = new ArrayList<String>();
 
       Scanner scan = new Scanner(System.in);
+      int size = scan.nextInt();
 
-      for (int i = 0; i < 3; i++)
+      System.out.println("Enter your DNS-servers:");
+
+      for (int i = 0; i < size; i++)
       {
-          String temp = scan.nextLine();
+          System.out.println("a" + i);
+          String temp = scan.next();
           DnsAddres.add(temp);
       }
       scan.close();
 
       ArrayList<DNSRes> DNSres = new ArrayList<DNSRes>();
 
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < size; i++)
       {
           ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "ping "+ DnsAddres.get(i));
           builder.redirectErrorStream(true);
