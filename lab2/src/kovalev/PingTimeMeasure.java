@@ -73,23 +73,31 @@ public final class PingTimeMeasure {
 
         String s = null;
         Double totalTimeMs = .0;
+        int packetsReceived = 0;
         while ((s = stdInput.readLine()) != null)
         {
             if (s.contains("time=")) {
                 String timeMsString = extractValue(s, "time");
                 Double timeMs = Double.parseDouble(timeMsString);
                 totalTimeMs += timeMs;
+                packetsReceived++;
             }
             else if (s.contains("could not find host") || s.contains("Name or service not known")) {
                 System.out.println("Не удалось найти сервер по адресу '" + ip + "'. Сервер пропущен.");
                 return exitSuccess;
             }
-            else if (s.contains("Destination Host Unreachable") || s.contains("Destination host unreachable") || s.contains("Request timed out") || s.contains("100% packet loss")) {
-                System.out.println("Запрос на сервер '" + ip + "' остался безответным. Сервер пропущен.");
-                return exitSuccess;
-            }
         }
-        totalTimeMs /= packetNum;
+        
+        if (packetsReceived == 0) {
+            System.out.println("Запросы на сервер '" + ip + "' остались безответными. Сервер пропущен.");
+            return exitSuccess;
+        }
+        else if (packetsReceived < packetNum) {
+            System.out.println(Integer.toString(packetNum - packetsReceived) + " из " + Integer.toString(packetNum) + " пакетов были потеряны.");
+        }
+
+        totalTimeMs /= packetsReceived;
+
         PingResult res = new PingResult(ip, totalTimeMs);
         connectionTime.add(res);
         Collections.sort(connectionTime, Comparator.comparing(PingResult::time).reversed());
