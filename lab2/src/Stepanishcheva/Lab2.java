@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -22,6 +25,7 @@ public class Lab1 {
         HashMap<String, Long> userOutput = new HashMap<>();
         Scanner userInput = new Scanner(System.in);
         InetAddress userAddress = null;
+
         for (int i = 0; i < addressNum; i++) {
             System.out.println("Введите адрес сервера DNS" + (i + 1) + ": ");
             try {
@@ -30,11 +34,36 @@ public class Lab1 {
                 System.out.println("Некорректный ввод адреса");
             }
             timeResult[i] = getTime(userAddress, addressNum);
-            if (timeResult[i] != 0) {
+            if (timeResult[i] >= 0) {
                 userOutput.put("Среднее время доступа до DNS сервера " + userAddress, timeResult[i]);
             }
         }
-        userOutput.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(System.out::println);
+        //userOutput.entrySet().stream().sorted(Map.Entry.comparingByValue());
+        putResult(userOutput);
+    }
+
+    public static void putResult(HashMap<String, Long>  userResult) {
+        final String outputFilePath = "lab2.txt";
+        File accessTime = new File(outputFilePath);
+        BufferedWriter bf = null;
+        userResult.entrySet().stream().sorted(Map.Entry.comparingByValue());
+
+        try {
+            bf = new BufferedWriter(new FileWriter(accessTime));
+            for (Map.Entry<String, Long> entry : userResult.entrySet()) {
+                bf.write(entry.getKey() + ":" + entry.getValue());
+                bf.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                assert bf != null;
+                bf.close();
+            } catch (Exception e) {}
+        }
+
     }
 
     public static void main(String[] args) throws IOException {
