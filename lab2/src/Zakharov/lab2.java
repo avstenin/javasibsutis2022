@@ -1,8 +1,6 @@
 package lab2.src.Zakharov;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,10 +20,11 @@ public class lab2 {
             ipAndAverageTime.put(ip.get(i), Integer.parseInt(averageTime.get(i)));
         }
         sortAverageTime(ipAndAverageTime);
+        writeToFile(ipAndAverageTime);
     }
 
     public static String getAverageTime(String ip) throws IOException {
-        String command = String.format("ping %s | ForEach-Object {if($_ -match 'Average = (\\d+)'){$Matches[1]}}", ip);
+        String command = String.format("ping %s | ForEach-Object {if($_ -match '(?:Среднее|Average) = (\\d+)'){$Matches[1]}}", ip);
         ProcessBuilder builder = new ProcessBuilder(
                 "powershell.exe", "/c", command);
         builder.redirectErrorStream(true);
@@ -45,6 +44,19 @@ public class lab2 {
         noSortedMap.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .forEach(x -> System.out.println(x + "ms"));
+    }
+
+    public static void writeToFile(HashMap averageTime) {
+        try {
+            File file = new File("newfile.txt");
+            PrintWriter pw = new PrintWriter(file);
+
+            pw.close();
+            if (!file.exists())
+                file.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Error " + e);
+        }
     }
 }
 
