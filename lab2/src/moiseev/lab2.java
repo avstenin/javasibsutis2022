@@ -20,7 +20,6 @@ public class lab2 {
 
       for (int i = 0; i < size; i++)
       {
-          System.out.println("a" + i);
           String temp = scan.next();
           DnsAddres.add(temp);
       }
@@ -55,7 +54,18 @@ public class lab2 {
 
           if (matcher.find())
           {
-            DNSres.add(new DNSRes(DnsAddres.get(i), Integer.parseInt(matcher.group(1))));
+            boolean canUse = true;
+            for (DNSRes a : DNSres)
+            {
+              if(a.getName().equals(DnsAddres.get(i)))
+              {
+                canUse = false;
+              }
+            }
+            if(canUse)
+            {
+              DNSres.add(new DNSRes(DnsAddres.get(i), Integer.parseInt(matcher.group(1))));
+            }
           }
       }
 
