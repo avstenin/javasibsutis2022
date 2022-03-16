@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.lang.Comparable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class lab2 {
 
@@ -62,8 +64,29 @@ public class lab2 {
       {
          System.out.println("Adr: " + a.getName() + ", time: " + a.getTime() + "ms");
       }
+
+      writeToFile(DNSres);
   }
 
+
+  public static void writeToFile(ArrayList<DNSRes> dnsRes) throws IOException
+  {
+    if(dnsRes.isEmpty() == false)
+    {
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+      String currentTime = dateTimeFormatter.format(LocalDateTime.now());
+      try(FileWriter fileWriter = new FileWriter("DNS-pings.txt", true);)
+      {
+        fileWriter.write("Pings by date: " + currentTime + '\n');
+        for(DNSRes dns : dnsRes)
+        {
+          fileWriter.write("Adr: " + dns.getName() + ", time: " + dns.getTime() + "ms\n");
+        }
+        fileWriter.write('\n');
+      }
+      System.out.println("Information successfully saved");
+    }
+  }
 }
 
 class DNSRes implements Comparable<DNSRes>
