@@ -32,6 +32,21 @@ class DNS implements Comparable<DNS>{
 
 public class Lab2 {
 
+
+    private static void printToFile(ArrayList<DNS> DNSPairs) {
+        if (!DNSPairs.isEmpty()) {
+            try (FileWriter file = new FileWriter("Result.txt")) {
+                for (DNS val : DNSPairs)
+                    if (val.getTime().toMillis() == Duration.ofDays(1).toMillis())
+                        file.write("DNS address " + val.getIP() + " unreachable\n");
+                    else
+                        file.write("Ping to " + val.getIP() + " is " + val.getTime().toMillis() + " ms\n");
+            } catch (Exception e) {
+            }
+        }
+    }
+
+
     public static Duration PingToAddress(String address) {
         Instant startTime = Instant.now();
         int timeout = 100;
@@ -70,7 +85,9 @@ public class Lab2 {
         }
 
         Collections.sort(DNSPairs, Collections.reverseOrder());
-        
+
+        printToFile(DNSPairs);
+
         for (DNS val : DNSPairs) {
             if (val.getTime().toMillis() == Duration.ofDays(1).toMillis()) {
                 System.out.println("\nDNS address " + val.getIP() + " unreachable");
