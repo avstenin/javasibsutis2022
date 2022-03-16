@@ -102,8 +102,14 @@ public final class PingTimeMeasure {
         int packetsReceived = 0;
         while ((s = stdInput.readLine()) != null)
         {
-            if (s.contains("time=")) {
-                String timeMsString = extractValue(s, "time");
+            if (s.contains("time=") || s.contains("время=")) {
+                String timeMsString;
+                if (s.contains("time=")) {
+                    timeMsString = extractValue(s, "time");
+                }
+                else {
+                    timeMsString = extractValue(s, "время");
+                }
                 Double timeMs = Double.parseDouble(timeMsString);
                 totalTimeMs += timeMs;
                 packetsReceived++;
