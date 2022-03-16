@@ -89,6 +89,22 @@ public class Lab2 {
             System.out.printf("IP-адрес: %-15s время ответа сервера: %3d мс.\n", out.getIP(), out.getAnswer());
         }
     }
+
+    public static void saveFile(ArrayList<answerDNS> answerDNS) throws IOException {
+            if(answerDNS.isEmpty() == false){
+                System.out.println("\nСохранение результатов в файл...");
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss");
+                String timeNow = dateTimeFormatter.format(LocalDateTime.now());
+                try(FileWriter fileWriter = new FileWriter("FileLab2", true);){
+                    fileWriter.write("Пинг был сделан: " + timeNow + '\n');
+                    for(answerDNS element : answerDNS){
+                        fileWriter.write(element.toString() + "\n");
+                    }
+                    fileWriter.write('\n');
+                }
+                System.out.println("Сохранение произошло успешно");
+            }
+        }
 }
 
 class answerDNS implements Comparable<answerDNS>{
@@ -111,5 +127,10 @@ class answerDNS implements Comparable<answerDNS>{
     @Override
     public int compareTo(answerDNS otherDNS) {
         return answer - otherDNS.answer;
+    }
+
+    @Override
+    public String toString() {
+        return "Ответ от " + ip + " составляет " + answer + " мс.";
     }
 }
