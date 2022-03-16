@@ -1,5 +1,6 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -45,6 +46,7 @@ public class Lab2 {
 
           System.out.println("Подождите, идет подсчет...");
           Ping(ipAddress, answerDNS);
+          saveFile(answerDNS);
       }
     }
 
@@ -95,7 +97,7 @@ public class Lab2 {
                 System.out.println("\nСохранение результатов в файл...");
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss");
                 String timeNow = dateTimeFormatter.format(LocalDateTime.now());
-                try(FileWriter fileWriter = new FileWriter("FileLab2", true);){
+                try(FileWriter fileWriter = new FileWriter("FileLab2.txt", true);){
                     fileWriter.write("Пинг был сделан: " + timeNow + '\n');
                     for(answerDNS element : answerDNS){
                         fileWriter.write(element.toString() + "\n");
