@@ -82,8 +82,8 @@ public class DNSLab2 {
 
         ArrayList<String> addressArray = new ArrayList<>();
         System.out.println("Input DNS address");
-        for (int i = 0; i <= inCount; i++) {
-            addressArray.add(sc.nextLine());
+        for (int i = 0; i < inCount; i++) {
+            addressArray.add(sc.next());
         }
 
         arrayInputOutpun(addressArray);
