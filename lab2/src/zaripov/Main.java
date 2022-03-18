@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    private static final int numOfResultStr = 14;
+    private static final int numOfResultStr = 11;
     private static int countDNSs;
 
     public static void main(String[] args) {
@@ -11,19 +11,23 @@ public class Main {
         countDNSs = in.nextInt();
         in.nextLine();
         String[][] DNSinfo = new String[3][countDNSs];
+        String DNS = "";
 
         for (int i = 0; i < countDNSs; i++) {
-            System.out.print("Введите адрес сервера DNS" + (i + 1) + ": ");
-            String DNS = in.nextLine();
-            BufferedReader r = getBufferOfProcess(DNS);
-            String averageTimeLine = getResultLine(r);
-            if (averageTimeLine == null) {
-                System.out.println("Не получилось обратиться к DNS: " + DNS);
-                DNSinfo[2][i] = "0";
-            } else {
+            try {
+                System.out.print("Введите адрес сервера DNS" + (i + 1) + ": ");
+                DNS = in.nextLine();
+                BufferedReader r = getBufferOfProcess(DNS);
+                String averageTimeLine = getResultLine(r, DNS);
+                if (averageTimeLine == null)
+                    continue;
                 DNSinfo[2][i] = String.valueOf(parseLine(averageTimeLine));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                DNSinfo[2][i] = "0";
+            } finally {
+                DNSinfo[0][i] = DNS;
             }
-            DNSinfo[0][i] = DNS;
         }
 
         sort(DNSinfo);
@@ -51,7 +55,7 @@ public class Main {
             }
             br.close();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -79,41 +83,38 @@ public class Main {
 
             return fileName;
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
-    public static BufferedReader getBufferOfProcess(String DNS) {
+    public static BufferedReader getBufferOfProcess(String DNS) throws IOException {
         try {
-            ProcessBuilder builder = new ProcessBuilder("ping", "-c", "10", DNS);
+            ProcessBuilder builder = new ProcessBuilder("ping", DNS);
             builder.redirectErrorStream(true);
             Process p = builder.start();
             return new BufferedReader(new InputStreamReader(p.getInputStream()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new IOException("Не удалось создать процесс");
         }
-        return null;
     }
 
     public static double parseLine(String line) {
-        String[] wordsArray = line.split(" ");
-        String[] timesArray = wordsArray[3].split("/");
-        return Double.parseDouble(timesArray[1]);
+        String[] wordsArray = line.split(",");
+        String[] timeArray = wordsArray[2].split(" ");
+        return Double.parseDouble(timeArray[3]);
     }
 
-    public static String getResultLine(BufferedReader r) {
-        try {
-            String line;
-            for (int i = 0; i <= numOfResultStr; i++) {
-                line = r.readLine();
-                System.out.println(line);
-                if (i == numOfResultStr) {
-                    return line;
-                }
+    public static String getResultLine(BufferedReader r, String DNS) throws IOException{
+        String line;
+        for (int i = 0; i <= numOfResultStr; i++) {
+            line = r.readLine();
+            if (line == null)
+                throw new IOException("Не удалось обратиться к DNS: " + DNS);
+            System.out.println(line);
+            if (i == numOfResultStr) {
+                return line;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return null;
     }
