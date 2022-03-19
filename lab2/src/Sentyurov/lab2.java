@@ -32,31 +32,36 @@ class dns_info implements Comparable<dns_info>{
     }
 }
 
-public class lab1 {
+public class lab2 {
 
-    public final static int dns_count = 3;
+    public static int dns_count = 0;
 
     public static void main(String[] args) throws Exception {
         ArrayList<dns_info> dns = new ArrayList<>();
+        ArrayList<String> addresses = new ArrayList<>();
         Scanner read = new Scanner(System.in);
-
+        System.out.print("How many DNS addresses you need to ping:");
+        dns_count = read.nextInt();
 
         for(int i = 0; i < dns_count; i++){
             System.out.println("Please input "+(i+1)+" IP-address:");
-            get_ping(read.nextLine(), dns);
+            get_ping(read.next(), dns, addresses);
         }
         read.close();
 
         Collections.sort(dns, Collections.reverseOrder());
-        System.out.println("Program result:");
+        System.out.println("\nProgram result:");
 
         for (dns_info out_dns: dns){
             System.out.printf("IP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping());
         }
+        System.out.println("If any of IP address is gone, that's mean that all packets were lost");
     }
 
-    public static void get_ping(String result, ArrayList<dns_info> dns) throws Exception {
-        //System.out.println("Computing");
+    public static void get_ping(String result, ArrayList<dns_info> dns, ArrayList<String> addresses) throws Exception {
+        System.out.println("Please wait");
+        addresses.add(result);
+        //System.out.println("Computing with " + result);
         String answer;
         ArrayList<String> answers = new ArrayList<>();
         ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd C:/windows/system32 && ping " + result);
