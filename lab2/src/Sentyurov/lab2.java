@@ -1,7 +1,10 @@
 package com.company;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Collections;
@@ -23,6 +26,10 @@ class dns_info implements Comparable<dns_info>{
 
     public int show_ping(){
         return ping;
+    }
+
+    public String collect_info(){
+        return "\tIP-address: " + address + " server's answer time: " + ping + " ms.";
     }
 
     @Override
@@ -56,12 +63,12 @@ public class lab2 {
             System.out.printf("IP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping());
         }
         System.out.println("If any of IP address is gone, that's mean that all packets were lost");
+        create_record(dns,addresses);
     }
 
     public static void get_ping(String result, ArrayList<dns_info> dns, ArrayList<String> addresses) throws Exception {
         System.out.println("Please wait");
         addresses.add(result);
-        //System.out.println("Computing with " + result);
         String answer;
         ArrayList<String> answers = new ArrayList<>();
         ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd C:/windows/system32 && ping " + result);
@@ -82,5 +89,29 @@ public class lab2 {
         if (matcher.find()) {
             dns.add(new dns_info(result, Integer.parseInt(matcher.group(1))));
         }
+    }
+
+    public static void create_record(ArrayList<dns_info> dns, ArrayList<String> addresses) throws  Exception {
+        boolean write_flag = false;
+        System.out.println("\nCreating new file with record");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd_MMMM_yyyy_HH_mm_ss");
+        String current_time = dateTimeFormatter.format(LocalDateTime.now());
+        try (FileWriter fileWriter = new FileWriter("log_"+current_time+".txt");) {
+            fileWriter.write("Date of ping: " + current_time + '\n');
+            for (String checking_dns : addresses) {
+                write_flag = false;
+                for(dns_info success_dns: dns) {
+                    if (checking_dns.equals(success_dns.show_address())) {
+                        fileWriter.write(success_dns.collect_info() + "\n");
+                        write_flag = true;
+                    }
+                }
+                if(!write_flag){
+                    fileWriter.write( "\tIP-address: " + checking_dns + " ping unsuccessful: all packets were lost"+"\n");
+                }
+            }
+            fileWriter.write('\n');
+        }
+        System.out.println("Record create success");
     }
 }
