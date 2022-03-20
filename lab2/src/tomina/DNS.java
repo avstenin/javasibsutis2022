@@ -1,5 +1,8 @@
 package tomina;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 public class DNS {
@@ -10,10 +13,14 @@ public class DNS {
     public int getTime() {
         return time;
     }
+
     public String getName() {
         return name;
     }
-    public String getIp_addr() { return ip_addr; }
+
+    public String getIp_addr() {
+        return ip_addr;
+    }
 
     public DNS(String ip_addr) {
         this.ip_addr = ip_addr;
@@ -22,6 +29,7 @@ public class DNS {
     public void setName(String name) {
         this.name = name;
     }
+
     public void setTime(int time) {
         this.time = time;
     }
@@ -33,10 +41,15 @@ public class DNS {
         }
     };
 
-    public void print(){
-        if(time!=-1)
-        System.out.printf("IP адрес DNS-сервера: %s \tDNS-сервер: %s \tСреднее время отклика: %d ms\n", ip_addr, name, time);
+    public static void write(ArrayList<DNS> arrDNS) throws IOException {
+        FileWriter writer = new FileWriter("output.txt");
+        for (DNS dns : arrDNS) {
+            if (dns.time != -1) {
+                String text = "IP адрес DNS-сервера:" + dns.ip_addr + "\tDNS-сервер: " + dns.name + " \tСреднее время отклика: " + dns.time + " ms\n";
+                writer.write(text);
+            }
+        }
+        writer.flush();
+        writer.close();
     }
-
-
 }

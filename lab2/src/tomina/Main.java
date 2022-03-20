@@ -1,8 +1,10 @@
 package tomina;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -14,7 +16,7 @@ public class Main {
         Scanner input = new Scanner(System.in);
         int index = 0;
         int n = 0;
-        System.out.println("Введите количество DNS-серверов\n");
+        System.out.println("Введите количество DNS-серверов");
         n = input.nextInt();
         for (int i = 0; i < n; i++){
         System.out.println("Введите адрес сервера DNS" + i +":");
@@ -46,8 +48,7 @@ public class Main {
             arrDNS.get(i).setTime(Integer.parseInt(time));
         }
         Collections.sort(arrDNS, DNS.COMPARE_BY_TIME);
-        for (int x = 0; x < n; x++){
-            arrDNS.get(x).print();
-        }
+        DNS.write(arrDNS);
+        System.out.println("Результат работы программы записан в файл output.txt");
     }
 }
