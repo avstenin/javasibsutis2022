@@ -49,6 +49,6 @@ public class Main {
         }
         Collections.sort(arrDNS, DNS.COMPARE_BY_TIME);
         DNS.write(arrDNS);
-        System.out.println("Результат работы программы записан в файл output.txt");
+        System.out.println("Результат работы программы записан в директории output.txt");
     }
 }

@@ -1,5 +1,6 @@
 package tomina;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,14 +43,16 @@ public class DNS {
     };
 
     public static void write(ArrayList<DNS> arrDNS) throws IOException {
-        FileWriter writer = new FileWriter("output.txt");
+        File path = new File("output");
+        path.mkdir();
         for (DNS dns : arrDNS) {
+            FileWriter writer = new FileWriter(path + "\\DNS" + arrDNS.indexOf(dns) + ".txt");
             if (dns.time != -1) {
                 String text = "IP адрес DNS-сервера:" + dns.ip_addr + "\tDNS-сервер: " + dns.name + " \tСреднее время отклика: " + dns.time + " ms\n";
                 writer.write(text);
             }
+            writer.flush();
+            writer.close();
         }
-        writer.flush();
-        writer.close();
     }
 }
