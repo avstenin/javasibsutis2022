@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 public class lab2 {
 
+  private final static int packetNumber = 4;
   public static void main(String[] args) throws IOException
   {
       System.out.println("Enter amount of DNS-servers:");
@@ -31,7 +32,9 @@ public class lab2 {
 
       for (int i = 0; i < size; i++)
       {
-          ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "ping "+ DnsAddres.get(i));
+          boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+          ProcessBuilder builder = new ProcessBuilder("ping", isWindows ? "-n" : "-c", String.valueOf(packetNumber), ipAddress.get(i));
+
           builder.redirectErrorStream(true);
           Process p = builder.start();
           BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -89,7 +92,10 @@ public class lab2 {
     {
       DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
       String currentTime = dateTimeFormatter.format(LocalDateTime.now());
-      try(FileWriter fileWriter = new FileWriter("DNS-pings.txt", true);)
+
+      String pathDir = System.getProperty("user.dir");
+      pathDir += File.separator + "src" + File.separator;
+      try(BufferedWriter fileWriter = new BufferedWriter(new FileWriter(pathDir + timeNow + ".txt")))
       {
         fileWriter.write("Pings by date: " + currentTime + '\n');
         for(DNSRes dns : dnsRes)
