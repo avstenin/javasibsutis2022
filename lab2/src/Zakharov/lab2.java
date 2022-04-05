@@ -1,16 +1,12 @@
 package lab2.src.Zakharov;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.Date;
+import java.util.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 public class lab2 {
     public static void main(String[] args) throws Exception {
@@ -25,34 +21,50 @@ public class lab2 {
         for (int i = 0; i < ipCount; i++) {
             ip.add(scr.next());
             averageTime.add(getAverageTime(ip.get(i)));
-            ipAndAverageTime.put(ip.get(i), Integer.parseInt(averageTime.get(i)));
+            ipAndAverageTime.put(ip.get(i), (int)Double.parseDouble(averageTime.get(i)));
         }
-        //sortAverageTime(ipAndAverageTime);
+        sortAverageTime(ipAndAverageTime);
         writeToFile(ipAndAverageTime);
         printResult();
     }
 
     public static String getAverageTime(String ip) throws IOException {
-        String command = String.format("ping %s | ForEach-Object {if($_ -match '(?:Среднее|Average) = (\\d+)'){$Matches[1]}}", ip);
-        ProcessBuilder builder = new ProcessBuilder(
-                "powershell.exe", "/c", command);
-        builder.redirectErrorStream(true);
+        String os = checkOperatingSystems();
+        ProcessBuilder builder;
+        if (os.equalsIgnoreCase("linux")) {
+            String command = String.format("ping -c 2 %s | tail -1| awk '{print $4}' | cut -d '/' -f 2", ip);
+            builder = new ProcessBuilder(
+                    "sh", "-c", command);
+        }
+        else {
+            String command = String.format("ping %s | ForEach-Object {if($_ -match 'Average|Среднее = (\\d+)'){$Matches[1]}}", ip);
+            builder = new ProcessBuilder(
+                    "powershell.exe", "/c", command);
+        }
         Process p = builder.start();
         BufferedReader r = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));
         String averageTime;
         averageTime = r.readLine();
-        if(averageTime == null) {
+        if (averageTime == null) {
             System.out.println("Не правильный IP адрес");
             System.exit(-1);
         }
         return averageTime;
     }
 
+    public static String checkOperatingSystems() {
+        String nameOS;
+        if (System.getProperty("os.name").toLowerCase().contains("windows"))
+            nameOS = "windows";
+        else
+            nameOS = "linux";
+        return nameOS;
+    }
+
     public static void sortAverageTime(HashMap<String, Integer> noSortedMap) {
         noSortedMap.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .forEach(x -> System.out.println(x + "ms"));
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed());
     }
 
     public static void writeToFile(HashMap<String, Integer> averageTime) {
