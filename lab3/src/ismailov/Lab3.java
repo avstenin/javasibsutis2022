@@ -66,12 +66,13 @@ public class Lab3 {
     }
 
     public static Duration PingToAddress(String address) {
-        Instant startTime = Instant.now();
+        final int dnsPort = 53;
         int timeout = 100;
         try {
-            InetAddress ping = InetAddress.getByName(address);
-            if (ping.isReachable(timeout))
-                return Duration.between(startTime, Instant.now());
+            Socket sock = new Socket();
+            Instant startTime = Instant.now();
+            sock.connect(new InetSocketAddress(address, dnsPort),timeout);
+            return Duration.between(startTime, Instant.now());
         } catch (IOException exception) {
         }
         return Duration.ofDays(1);
@@ -80,6 +81,7 @@ public class Lab3 {
     public static ArrayList<String> FileInput(String name) throws FileNotFoundException{
         ArrayList<String> addresses = new ArrayList<String>();
         File file = recursiveFileSearch(new File(System.getProperty("user.dir")),name);
+        if(file == null) return null;
         FileReader fReader = new FileReader(file);
         BufferedReader bReader = new BufferedReader(fReader);
         int i = 1;
@@ -102,9 +104,8 @@ public class Lab3 {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
             System.out.println("File read error");
-            return null;
         }
         if(!invalidIP.isEmpty())
         {
@@ -133,8 +134,9 @@ public class Lab3 {
         return result;
     }
 
-    public static void getFileHistory(String filename) throws FileNotFoundException{
+    public static boolean getFileHistory(String filename) throws FileNotFoundException{
         File file = recursiveFileSearch(new File(System.getProperty("user.dir")),filename);
+        if(file == null) return false;
         FileReader fReader = new FileReader(file);
         BufferedReader bReader = new BufferedReader(fReader);
         String line;
@@ -149,71 +151,80 @@ public class Lab3 {
             e.printStackTrace();
             System.out.println("File read error");
         }
+        return true;
     }
 
     public static void main(String[] args) throws IOException{
         Scanner in = new Scanner(System.in);
-        System.out.println("Choose mode:\n1.Manual input\n2.File input\n3.History search");
-        int mode = in.nextInt();
-        if(mode != 1 && mode != 2 && mode != 3){
-            System.out.println("Invalid input. Try again");
-            System.exit(1);
-        }
+        while(true) {
+            System.out.println("Choose mode:\n1.Manual input\n2.File input\n3.History search\n4.Exit");
+            int mode = in.nextInt();
+            if (mode != 1 && mode != 2 && mode != 3 && mode != 4) {
+                System.out.println("Invalid input. Try again");
+                continue;
+            }
 
-        ArrayList<String> addresses = new ArrayList<>();
 
-        if(mode == 1){
-            System.out.println("Type in quantity of DNS addresses: ");
-            int DNSQuantity = in.nextInt();
+            ArrayList<String> addresses = new ArrayList<>();
 
-            System.out.println("Type in DNS addresses");
-            for (int i = 0; i < DNSQuantity; i++) {
-                String address = in.next();
-                if(isValid(address)) {
-                    if (!addresses.contains(address))
-                        addresses.add(address);
+
+            if (mode == 1) {
+                System.out.println("Type in quantity of DNS addresses: ");
+                int DNSQuantity = in.nextInt();
+                System.out.println("Type in DNS addresses");
+                for (int i = 0; i < DNSQuantity; i++) {
+                    String address = in.next();
+                    if (isValid(address)) {
+                        if (!addresses.contains(address))
+                            addresses.add(address);
+                    } else {
+                        System.out.println("Invalid ip address. Try again");
+                        i--;
+                    }
                 }
-                else{
-                    System.out.println("Invalid ip address. Try again");
-                    i--;
+            } else if (mode == 2) {
+                System.out.println("Type in filename");
+                String filename = in.next();
+                addresses = FileInput(filename);
+                if (addresses == null) {
+                    System.out.println("Can't find file. Try again.\n");
+                    continue;
+                }
+
+            } else if (mode == 3) {
+                System.out.println("Type in filename in format [yyyy-mm-dd_hh_mm_ss]");
+                String filename = in.next();
+                if(!getFileHistory(filename)){
+                    System.out.println("Can't find file. Try again.\n");
+                    continue;
+                }
+            } else if (mode == 4) {
+                in.close();
+                System.exit(0);
+            }
+
+
+            ArrayList<DNS> DNSPairs = new ArrayList<DNS>();
+            int RequestQuantity = 5;
+            for (String val : addresses) {
+                if (val != "") {
+                    Duration time = Duration.ZERO;
+                    for (int j = 0; j < RequestQuantity; j++)
+                        time = time.plus(PingToAddress(val));
+                    DNSPairs.add(new DNS(val, time.dividedBy(RequestQuantity)));
                 }
             }
-        }
-        else if(mode == 2){
-            System.out.println("Type in filename");
-            String filename = in.next();
-            addresses = FileInput(filename);
-        }
-        else if(mode == 3)
-        {
-            System.out.println("Type in filename in format [yyyy-mm-dd_hh_mm_ss]");
-            String filename = in.next();
-            getFileHistory(filename);
-            System.exit(0);
-        }
 
-        in.close();
-
-        ArrayList<DNS> DNSPairs = new ArrayList<DNS>();
-        int RequestQuantity = 5;
-        for (String val : addresses) {
-            if (val != "") {
-                Duration time = Duration.ZERO;
-                for (int j = 0; j < RequestQuantity; j++)
-                    time = time.plus(PingToAddress(val));
-                DNSPairs.add(new DNS(val, time.dividedBy(RequestQuantity)));
+            Collections.sort(DNSPairs, Collections.reverseOrder());
+            printToFile(DNSPairs);
+            for (DNS val : DNSPairs) {
+                if (val.getTime().toMillis() == Duration.ofDays(1).toMillis()) {
+                    System.out.println("\nDNS address " + val.getIP() + " unreachable");
+                } else {
+                    System.out.println("\nPing to " + val.getIP() + " is " + val.getTime().toMillis() + " ms");
+                }
             }
-        }
-
-        Collections.sort(DNSPairs, Collections.reverseOrder());
-        printToFile(DNSPairs);
-        for (DNS val : DNSPairs) {
-            if (val.getTime().toMillis() == Duration.ofDays(1).toMillis()) {
-                System.out.println("\nDNS address " + val.getIP() + " unreachable");
-            }
-            else {
-                System.out.println("\nPing to " + val.getIP() + " is " + val.getTime().toMillis() + " ms");
-            }
+            System.out.println();
         }
     }
 }
