@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 public class Lab2 {
   private static int countIP, countStartIP, countAnswerDNS = 0;
+  private final static int packetNumber = 4;
 
   public static void main(String[] args) throws Exception{
       ArrayList<String> ipAddress = new ArrayList<>();
@@ -52,7 +53,8 @@ public class Lab2 {
 
     public static void Ping(ArrayList<String> ipAddress, ArrayList<answerDNS> answerDNS) throws Exception{
         for (int i = 0; i < countIP; i++){
-            ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "ping " + ipAddress.get(i));
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+            ProcessBuilder builder = new ProcessBuilder("ping", isWindows ? "-n" : "-c", String.valueOf(packetNumber), ipAddress.get(i));
             builder.redirectErrorStream(true);
             Process process = builder.start();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
