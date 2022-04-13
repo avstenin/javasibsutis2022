@@ -38,7 +38,7 @@ public class Lab1 {
                 userOutput.put("Среднее время доступа до DNS сервера " + userAddress, timeResult[i]);
             }
         }
-        //userOutput.entrySet().stream().sorted(Map.Entry.comparingByValue());
+        userOutput.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(System.out::println);
         putResult(userOutput);
     }
 
@@ -51,7 +51,7 @@ public class Lab1 {
         try {
             bf = new BufferedWriter(new FileWriter(accessTime));
             for (Map.Entry<String, Long> entry : userResult.entrySet()) {
-                bf.write(entry.getKey() + ":" + entry.getValue());
+                bf.write(entry.getKey() + " : " + entry.getValue() + " nsec");
                 bf.newLine();
             }
         } catch (IOException e) {
