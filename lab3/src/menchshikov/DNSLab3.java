@@ -135,29 +135,31 @@ public class DNSLab3 {
     }
 
     public static void main(String[] args) throws IOException {
-        ArrayList<String> addressArray = new ArrayList<>();
         Scanner sc = new Scanner(System.in);
-        String multiline = "1.Console input\n" +
-                "2.File input\n" +
-                "3.Search file\n";
-        System.out.println(multiline);
-        int firstInput = sc.nextInt();
-        if (firstInput == 1) {
-            System.out.println("Input count of addresses");
-            int inCount = sc.nextInt();
-            System.out.println("Input DNS address");
-            for (int i = 0; i < inCount; i++) {
-                addressArray.add(sc.next());
+        while (true) {
+            ArrayList<String> addressArray = new ArrayList<>();
+            String multiline = "1.Console input\n" +
+                    "2.File input\n" +
+                    "3.Search file\n" +
+                    "4.Exit";
+            System.out.println(multiline);
+            int firstInput = sc.nextInt();
+            if (firstInput == 1) {
+                System.out.println("Input count of addresses");
+                int inCount = sc.nextInt();
+                System.out.println("Input DNS address");
+                for (int i = 0; i < inCount; i++) {
+                    addressArray.add(sc.next());
+                }
+            } else if (firstInput == 2) {
+                System.out.println("Name of file: ");
+                String filename = sc.next();
+                addressArray = inputFromFile(filename);
+            } else if (firstInput == 4) {
+                break;
             }
-
-        } else if (firstInput == 2) {
-            System.out.println("Name of file: ");
-            String filename = sc.next();
-            addressArray = inputFromFile(filename);
+            arrayInputOutput(addressArray);
         }
-
-        arrayInputOutput(addressArray);
-
         sc.close();
     }
 }
