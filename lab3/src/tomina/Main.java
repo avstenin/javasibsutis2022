@@ -1,14 +1,9 @@
 package tomina;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
@@ -19,7 +14,7 @@ public class Main {
         int n = 0;
         System.out.println("0 - ввод с консоли");
         System.out.println("1 - ввод с файла");
-        System.out.println("3 - вывод всей истории запросов");
+        System.out.println("2 - вывод всей истории запросов");
         int sw = input.nextInt();
         switch (sw){
             case(0):
@@ -59,7 +54,7 @@ public class Main {
                 System.out.println("Результат работы программы записан в директории /output");
                 break;
             case(1):
-                System.out.println("Введите имя файла (он должен быть в текущей директории)");
+                System.out.println("Введите имя файла в директории запуска");
                 String filename = input.next();
                 File doc = new File(filename);
                 Scanner obj = new Scanner(doc);
@@ -98,10 +93,29 @@ public class Main {
                 System.out.println("Результат работы программы записан в директории /output");
                 break;
             case(2):
+                File dir = new File("output");
+                searchFiles(dir);
                 break;
             default:
                 break;
         }
 
+    }
+
+    private static void searchFiles(File dir) throws IOException {
+        File[] files = dir.listFiles();
+        for (File item : files) {
+            if (item.isFile()) {
+                try (BufferedReader in = new BufferedReader(new FileReader(item.getParent() + "\\" + item.getName()))) {
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                }
+            } else {
+                System.out.println(item.getName());
+                searchFiles(item);
+            }
+        }
     }
 }
