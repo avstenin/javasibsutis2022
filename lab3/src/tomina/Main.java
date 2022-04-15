@@ -2,6 +2,9 @@ package tomina;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Main {
@@ -21,6 +24,7 @@ public class Main {
                 break;
             case(2):
                 File dir = new File("output");
+                //if(dir.) System.out.println("0 - ввод с консоли");
                 searchFiles(dir);
                 break;
             default:
@@ -81,8 +85,13 @@ public class Main {
         for (int i = 0; i < n; i++){
             System.out.println("Введите адрес сервера DNS" + i +":");
             arrDNS.add(new DNS(input.next()));
-            InetAddress inetAddress = java.net.InetAddress.getByName(arrDNS.get(i).getIp_addr());
-            arrDNS.get(i).setName(inetAddress.getHostName());
+            try{
+                InetAddress inetAddress = java.net.InetAddress.getByName(arrDNS.get(i).getIp_addr());
+                arrDNS.get(i).setName(inetAddress.getHostName());
+            }catch (IOException e){
+                System.out.println(e.getMessage());
+            }
+
             ProcessBuilder builder = new ProcessBuilder(
                     "cmd.exe", "/c", "ping", arrDNS.get(i).getIp_addr());
             builder.redirectErrorStream(true);
@@ -113,19 +122,24 @@ public class Main {
     }
 
     private static void searchFiles(File dir) throws IOException {
-        File[] files = dir.listFiles();
-        for (File item : files) {
-            if (item.isFile()) {
-                try (BufferedReader in = new BufferedReader(new FileReader(item.getParent() + "\\" + item.getName()))) {
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        System.out.println(line);
+        Path path = Paths.get("output");
+        if (Files.exists(path)) {
+            File[] files = dir.listFiles();
+            for (File item : files) {
+                if (item.isFile()) {
+                    try (BufferedReader in = new BufferedReader(new FileReader(item.getParent() + "\\" + item.getName()))) {
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            System.out.println(line);
+                        }
                     }
+                } else if (item.isDirectory()) {
+                    System.out.println(item.getName());
+                    searchFiles(item);
                 }
-            } else {
-                System.out.println(item.getName());
-                searchFiles(item);
             }
+        } else {
+            System.out.println("No history");
         }
     }
 }
