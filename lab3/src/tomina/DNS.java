@@ -3,6 +3,9 @@ package tomina;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,11 +48,11 @@ public class DNS {
     };
 
     public static void write(ArrayList<DNS> arrDNS) throws IOException {
+
         String date = new SimpleDateFormat("yyyy_MM_dd(HH;mm)").format(new Date(System.currentTimeMillis()));
-        File path = new File(date);
-        path.mkdir();
+        Path dir = Files.createDirectories(Paths.get("output", date));
         for (DNS dns : arrDNS) {
-            FileWriter writer = new FileWriter(path + "\\DNS" + arrDNS.indexOf(dns) + ".txt");
+            FileWriter writer = new FileWriter(dir + "\\DNS" + arrDNS.indexOf(dns) + ".txt");
             if (dns.time != -1) {
                 String text = "IP адрес DNS-сервера:" + dns.ip_addr + "\tDNS-сервер: " + dns.name + " \tСреднее время отклика: " + dns.time + " ms\n";
                 writer.write(text);
