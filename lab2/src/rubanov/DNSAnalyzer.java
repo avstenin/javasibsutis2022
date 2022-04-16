@@ -97,9 +97,22 @@ public class DNSAnalyzer {
             return this;
         }
 
+        var printfOffsets = getMapFieldsMaxLength();
         for (var row : testResults.entrySet())
-            System.out.printf("%15s  -  %6s\n", row.getKey(), row.getValue());
+            System.out.printf("%" + printfOffsets[0] + "s  -  %" + printfOffsets[1] + "s\n", row.getKey(), row.getValue());
         return this;
+    }
+
+    private int[] getMapFieldsMaxLength() {
+        var maxKeyLength = 0;
+        var maxValueLength = 0;
+        for (var row : testResults.entrySet()) {
+            var keyLength = row.getKey().length();
+            var valueLength = Float.toString(row.getValue()).length();
+            maxKeyLength = Math.max(keyLength, maxKeyLength);
+            maxValueLength = Math.max(valueLength, maxValueLength);
+        }
+        return new int[]{maxKeyLength, maxValueLength};
     }
 
     public LinkedHashMap<String, Float> getTestResults() {
