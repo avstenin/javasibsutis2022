@@ -11,6 +11,7 @@ public class lab2 {
             System.out.println("Enter the number of DNS servers:");
             var testsCount = scanner.nextInt();
             new DNSAnalyzer().startTest(testsCount).printTopTimes();
+            new CSVReader().printAllTestResults();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

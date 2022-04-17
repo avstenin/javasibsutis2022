@@ -1,2 +1,8 @@
-package lab2.src.rubanov;public interface Reader {
+package lab2.src.rubanov;
+
+
+import java.io.IOException;
+
+public interface Reader {
+    void printAllTestResults() throws IOException;
 }
