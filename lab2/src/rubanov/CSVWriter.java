@@ -1,5 +1,8 @@
 package lab2.src.rubanov;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.time.ZonedDateTime;
@@ -24,15 +27,12 @@ public class CSVWriter implements Writer {
     public void tryWriteMapToFile(Map<String, Float> map) throws Exception {
         var fileName = generateNewFileName();
         var fileNamePath = logDirectoryPath + File.separator + generateNewFileName();
-        var fileWriter = new FileWriter(fileNamePath);
-        var stringBuilder = new StringBuilder();
 
+        CSVPrinter printer = new CSVPrinter(new FileWriter(fileNamePath), CSVFormat.EXCEL);
         for (var row : map.entrySet()) {
-            stringBuilder.append(row.getKey()).append(',');
-            stringBuilder.append(row.getValue()).append('\n');
+            printer.printRecord(row.getKey(), row.getValue());
         }
-        fileWriter.write(String.valueOf(stringBuilder));
-        fileWriter.close();
+        printer.close();
 
         System.out.println("File created: " + fileName);
     }
@@ -45,8 +45,6 @@ public class CSVWriter implements Writer {
             } else {
                 throw new Exception("Cannot create folder");
             }
-        } else {
-            System.out.println("Folder " + folderCreator.getName() + " exist");
         }
     }
 
