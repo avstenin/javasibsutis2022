@@ -1,3 +1,5 @@
+package dns;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -80,7 +82,7 @@ public final class PingTimeMeasure {
 
     public static void remove(String ip)
     {
-        var query = findQuery(ip);
+        PingResult query = findQuery(ip);
         if (query != null)
             queriesLog.remove(query);
     }
@@ -102,8 +104,14 @@ public final class PingTimeMeasure {
         int packetsReceived = 0;
         while ((s = stdInput.readLine()) != null)
         {
-            if (s.contains("time=")) {
-                String timeMsString = extractValue(s, "time");
+            if (s.contains("time=") || s.contains("время=")) {
+                String timeMsString;
+                if (s.contains("time=")) {
+                    timeMsString = extractValue(s, "time");
+                }
+                else {
+                    timeMsString = extractValue(s, "время");
+                }
                 Double timeMs = Double.parseDouble(timeMsString);
                 totalTimeMs += timeMs;
                 packetsReceived++;

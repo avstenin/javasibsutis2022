@@ -1,3 +1,5 @@
+package dns;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -79,7 +81,7 @@ public class DNSLatency {
                 for (int i = 1; i <= ipQueryNum; i++) {
                     System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
                     String ip = scanner.next();
-                    var query = PingTimeMeasure.findQuery(ip);
+                    PingResult query = PingTimeMeasure.findQuery(ip);
                     if (query != null) {
                         System.out.println("Сервер по адресу '" + ip + "' уже был протестирован. Его результат: " + query.time() + " мс.");
                         System.out.println("Хотите сбросить результат? [y/N]");
