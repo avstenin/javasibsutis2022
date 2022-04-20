@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
@@ -27,6 +28,26 @@ class DNS implements Comparable<DNS> {
 }
 
 public class DNSLab3 {
+    public static boolean fileHistory(String filename) throws FileNotFoundException {
+        File file = searchFile(new File(System.getProperty("user.dir")), filename);
+        if (file == null)
+            return false;
+        FileReader fReader = new FileReader(file);
+        BufferedReader bReader = new BufferedReader(fReader);
+        String line;
+        try {
+            line = bReader.readLine();
+            while (line != null) {
+                System.out.println("\t" + line);
+                line = bReader.readLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("File read error");
+        }
+        return true;
+    }
+
     public static Boolean checkIP(String line) {
         String[] numbers = line.split("\\.");
         for (int i = 0; i < numbers.length; i++) {
@@ -95,14 +116,17 @@ public class DNSLab3 {
                 return Duration.between(startTime, Instant.now());
             }
         } catch (IOException e) {
-            //
+            e.printStackTrace();
+            System.out.println("Error speed test");
         }
         return Duration.ofDays(1);
     }
 
     public static void printInFile(ArrayList<DNS> DNS) throws IOException {
+        String filename = new SimpleDateFormat("dd-MM-yy_HH-mm").format(Calendar.getInstance().getTime());
+        filename += ".txt";
         if (!DNS.isEmpty()) {
-            File fileOut = new File("out.txt");
+            File fileOut = new File(filename);
             FileWriter fw = new FileWriter(fileOut);
             for (DNS out : DNS) {
                 fw.write(out.getIP() + ": " + out.getTime().toMillis() + "ms" + "\n");
@@ -155,6 +179,13 @@ public class DNSLab3 {
                 System.out.println("Name of file: ");
                 String filename = sc.next();
                 addressArray = inputFromFile(filename);
+            } else if (firstInput == 3) {
+                System.out.println("Input file with format: 'dd-MM-yy_HH-mm.txt'");
+                String filename = sc.next();
+                if (!fileHistory(filename)) {
+                    System.out.println("Input error");
+                    continue;
+                }
             } else if (firstInput == 4) {
                 break;
             }
