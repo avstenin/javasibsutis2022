@@ -35,7 +35,8 @@ public class DNSLatency {
     /**
      * @return Текущая дата в формате "yyyy-MM-dd_HH-mm-ss".
      */
-    private static String getCurrentDate() {
+    private static String getCurrentDate()
+    {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         Date now = Calendar.getInstance().getTime();
         return df.format(now);
@@ -44,13 +45,20 @@ public class DNSLatency {
     /**
      * @param list Строка формата [el1,el2,...]
      * @return Список из строк el1, el2, ...
+     * @throws ListParsingError Нельзя извлечь элементы из полученного списка.
      */
-    public static String[] extractListElements(String list) {
+    public static String[] extractListElements(String list)
+    throws ListParsingError
+    {
         String[] matches = Pattern.compile("[\\[,](.+?)(?=[\\],])")
                                   .matcher(list)
                                   .results()
                                   .map(match -> match.group(1))
                                   .toArray(String[]::new);
+
+        if (matches.length == 0)
+            throw new ListParsingError();
+
         return matches;
     }
 
@@ -63,7 +71,7 @@ public class DNSLatency {
     private static void parseArgs(String[] args) {
         Options options = new Options();
         options.addOption("i", "input", true, "Input File/Directory");
-        options.addOption("l", "list", true, "List of Domains for Test; ex. '[localhost;8.8.8.8;1.1.1.1;ya.ru]'");
+        options.addOption("l", "list", true, "List of Domains for Test; ex. '[localhost,8.8.8.8,1.1.1.1,ya.ru]'");
         options.addOption("o", "output", true, "Output CSV File");
 
         CommandLineParser parser = new DefaultParser();
@@ -100,7 +108,11 @@ public class DNSLatency {
         if (!csvData.exists() || csvData.isDirectory())
             return;
         
-        try (CSVParser parser = CSVParser.parse(csvData, Charset.defaultCharset(), CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").build()))
+        try (CSVParser parser = CSVParser.parse(csvData,
+                                                Charset.defaultCharset(),
+                                                CSVFormat.Builder.create(CSVFormat.DEFAULT)
+                                                                 .setDelimiter(";")
+                                                                 .build()))
         {
             for (CSVRecord csvRecord : parser) {
                 String ip = csvRecord.get(0);
