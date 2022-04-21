@@ -1,7 +1,9 @@
 package dns;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,7 +21,16 @@ import org.apache.commons.cli.ParseException;
 
 public class DNSLatency {
     private static File inputFile = new File("csv/");
-    private static String outputFilePath;
+    private static String outputFilePath = "csv/DNSQueries__" + getCurrentDate() + ".csv";
+
+    /**
+     * @return Текущая дата в формате "yyyy-dd-MM_HH-mm-ss".
+     */
+    private static String getCurrentDate() {
+        DateFormat df = new SimpleDateFormat("yyyy-dd-MM_HH-mm-ss");
+        Date now = Calendar.getInstance().getTime();
+        return df.format(now);
+    }
 
     /**
      * Обработка поданных аргументов с использованием Commons CLI.
@@ -46,15 +57,8 @@ public class DNSLatency {
 
         if (cmd.hasOption("input"))
             inputFile = new File(cmd.getOptionValue("input"));
-
         if (cmd.hasOption("output"))
             outputFilePath = cmd.getOptionValue("output");
-        else {
-            DateFormat df = new SimpleDateFormat("yyyy-dd-MM_HH-mm-ss");
-            Date now = Calendar.getInstance().getTime();
-            String suffix = df.format(now);
-            outputFilePath = "csv/DNSQueries__" + suffix + ".csv";
-        }
     }
 
     /**
@@ -123,6 +127,38 @@ public class DNSLatency {
         }
         return ip;
     }
+
+    /**
+     * Печатает в консоль в формате таблицы результаты.
+     */
+    private static void printQueriesTable() {
+        String header = String.format("%-16s | %s", "Домен", "Среднее время");
+        System.out.println();
+        System.out.println(header);
+        System.out.println("-".repeat(header.length()));
+        for (PingResult result : PingTimeMeasure.getQueriesLog())
+            System.out.println(result.toString());
+    }
+
+    /**
+     * Сохраняет результаты в файл вывода в формате CSV.
+     */
+    private static void saveQueriesCsv() {
+        PingResult[] queriesLog = PingTimeMeasure.getQueriesLog();
+        if ((queriesLog.length == 0) || outputFilePath.isEmpty())
+            return;
+
+        File parentFolder = new File(outputFilePath).getAbsoluteFile().getParentFile();
+        parentFolder.mkdirs();
+
+        try (PrintWriter out = new PrintWriter(outputFilePath)) {
+            for (PingResult res : queriesLog) {
+                out.println(res.getIp() + ";" + res.getTime());
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Ошибка записи в файл '" + outputFilePath + "'!");
+        }
+    }
     public static void main(String[] args)
     throws IOException {
         parseArgs(args);
@@ -140,14 +176,8 @@ public class DNSLatency {
             } catch (InterruptedException | NoSuchElementException e) {
                 System.out.println("Зафиксировали прерывание, выходим.");
             } finally {
-                String header = String.format("%-16s | %s", "Домен", "Среднее время");
-                System.out.println();
-                System.out.println(header);
-                System.out.println("-".repeat(header.length()));
-                for (PingResult result : PingTimeMeasure.getQueriesLog()) {
-                    System.out.println(result.toString());
-                }
-                PingTimeMeasure.writeToFile(outputFilePath);
+                printQueriesTable();
+                saveQueriesCsv();
             }
         }
         

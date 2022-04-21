@@ -2,10 +2,8 @@ package dns;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -118,21 +116,5 @@ public final class PingTimeMeasure {
 
     public static PingResult[] getQueriesLog() {
         return queriesLog.toArray(new PingResult[0]);
-    }
-
-    public static void writeToFile(String destination) {
-        if (queriesLog.isEmpty() || destination.isEmpty())
-            return;
-
-        File parentFolder = new File(destination).getAbsoluteFile().getParentFile();
-        parentFolder.mkdirs();
-
-        try (PrintWriter out = new PrintWriter(destination)) {
-            for (PingResult res : queriesLog) {
-                out.println(res.getIp() + ";" + res.getTime());
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("Ошибка записи в файл '" + destination + "'!");
-        }
     }
 }
