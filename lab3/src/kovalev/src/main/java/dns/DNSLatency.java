@@ -83,68 +83,73 @@ public class DNSLatency {
     }
 
     /**
-     * Используя консольный ввод, запрашивается количество серверов, которые введёт пользователь.
+     * Используя сканнер sc, запрашивается количество серверов, которые введёт пользователь.
      * 
+     * @param sc Сканнер на ввод
      * @return Количество серверов на проверку производительности.
      */
-    private static int requestIpQueryNum() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Введите число серверов DNS:");
-            while (true) {
-                try {
-                    return Integer.parseInt(scanner.next());
-                }
-                catch (NumberFormatException e) {
-                    System.out.println("Введите корректное число!");
-                }
+    private static int requestIpQueryNum(Scanner sc) {
+        System.out.println("Введите число серверов DNS:");
+        while (true) {
+            try {
+                return Integer.parseInt(sc.next());
+            }
+            catch (NumberFormatException e) {
+                System.out.println("Введите корректное число!");
             }
         }
     }
 
     /**
-     * Используя консольный ввод, запрашивается доменное имя сервера.
+     * Используя сканнер sc, запрашивается доменное имя сервера.
      * Если сервер уже проходил тестирование, запрашивается разрешение на сброс результата.
      * 
+     * @param sc Сканнер на ввод
      * @param i Порядковый номер сервера
      * @return Строка доменного имени сервера, либо null
      */
-    private static String requestDnsServer(int i) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
-            String ip = scanner.next();
-            PingResult query = PingTimeMeasure.findQuery(ip);
-            if (query != null) {
-                System.out.println("Сервер по адресу '" + ip + "' уже был протестирован. Его результат: " + query.time() + " мс.");
-                System.out.println("Хотите сбросить результат? [y/N]");
-                String answer = scanner.next();
-                if (answer.toLowerCase() == "y")
-                    PingTimeMeasure.remove(ip);
-                else
-                    return null;
-            }
-            return ip;
+    private static String requestDnsServer(Scanner sc, int i) {
+        System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
+        String ip = sc.next();
+        PingResult query = PingTimeMeasure.findQuery(ip);
+        if (query != null) {
+            System.out.println("Сервер по адресу '" + ip + "' уже был протестирован. Его результат: " + query.getTime() + " мс.");
+            System.out.println("Хотите сбросить результат? [y/N]");
+            String answer = sc.next();
+            if (answer.toLowerCase() == "y")
+                PingTimeMeasure.remove(ip);
+            else
+                return null;
         }
+        return ip;
     }
     public static void main(String[] args)
     throws IOException {
         parseArgs(args);
         readCsv();
 
-        int ipQueryNum = requestIpQueryNum();
-
-        try {
-            for (int i = 1; i <= ipQueryNum; i++) {
-                String ip = requestDnsServer(i);
+        try (Scanner scanner = new Scanner(System.in)) {
+            int ipQueryNum = requestIpQueryNum(scanner);
+            try {
+                for (int i = 1; i <= ipQueryNum; i++) {
+                    System.out.println();
+                    String ip = requestDnsServer(scanner, i);
+                    if (ip != null)
+                        PingTimeMeasure.add(ip);
+                }
+            } catch (InterruptedException | NoSuchElementException e) {
+                System.out.println("Зафиксировали прерывание, выходим.");
+            } finally {
+                String header = String.format("%-16s | %s", "Домен", "Среднее время");
                 System.out.println();
-                if (ip != null)
-                    PingTimeMeasure.add(ip);
+                System.out.println(header);
+                System.out.println("-".repeat(header.length()));
+                for (PingResult result : PingTimeMeasure.getQueriesLog()) {
+                    System.out.println(result.toString());
+                }
+                PingTimeMeasure.writeToFile(outputFilePath);
             }
-        } catch (InterruptedException | NoSuchElementException e) {
-            System.out.println("Зафиксировали прерывание, выходим.");
         }
-        finally {
-            PingTimeMeasure.print();
-            PingTimeMeasure.writeToFile(outputFilePath);
-        }
+        
     }
 }

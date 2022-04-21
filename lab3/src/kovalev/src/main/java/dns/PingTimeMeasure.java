@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,32 +19,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-class PingResult {
-    private String ip;
-    private Double time;
-
-    public PingResult(String ip, Double time) {
-        this.ip = ip;
-        this.time = time;
-    }
-
-    public void print() {
-        System.out.println("IP: " + ip);
-        System.out.println("Среднее время: " + String.valueOf(time) + " мс");
-        System.out.println();
-    }
-
-    public Double time() {
-        return time;
-    }
-
-    public String ip() {
-        return ip;
-    }
-}
-
 public final class PingTimeMeasure {
-    private static ArrayList<PingResult> queriesLog = new ArrayList<PingResult>();
+    private static List<PingResult> queriesLog = new ArrayList<PingResult>();
     private final static int packetNum = 5;
 
     private PingTimeMeasure() {}
@@ -59,7 +36,7 @@ public final class PingTimeMeasure {
     public static PingResult findQuery(String ip)
     {
         return queriesLog.stream()
-                             .filter( query -> ip.equals( query.ip() ) )
+                             .filter( query -> ip.equals( query.getIp() ) )
                              .findAny()
                              .orElse(null);
     }
@@ -134,15 +111,13 @@ public final class PingTimeMeasure {
 
         PingResult res = new PingResult(ip, totalTimeMs);
         queriesLog.add(res);
-        Collections.sort(queriesLog, Comparator.comparing(PingResult::time).reversed());
+        Collections.sort(queriesLog, Comparator.comparing(PingResult::getTime).reversed());
 
         return exitSuccess;
     }
 
-    public static void print() {
-        for (PingResult res : queriesLog) {
-            res.print();
-        }
+    public static PingResult[] getQueriesLog() {
+        return queriesLog.toArray(new PingResult[0]);
     }
 
     public static void writeToFile(String destination) {
@@ -154,7 +129,7 @@ public final class PingTimeMeasure {
 
         try (PrintWriter out = new PrintWriter(destination)) {
             for (PingResult res : queriesLog) {
-                out.println(res.ip() + ";" + res.time());
+                out.println(res.getIp() + ";" + res.getTime());
             }
         } catch (FileNotFoundException e) {
             System.out.println("Ошибка записи в файл '" + destination + "'!");
