@@ -18,8 +18,16 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class DNSLatency {
-    public static void main(String[] args)
-    throws IOException {
+    private static File inputFile = new File("csv/");
+    private static String outputFilePath;
+
+    /**
+     * Обработка поданных аргументов с использованием Commons CLI.
+     * Даёт пользователю возможность задать свои пути ввода/вывода.
+     * 
+     * @param args Аргументы, поданные через CLI.
+     */
+    private static void parseArgs(String[] args) {
         Options options = new Options();
         options.addOption("i", "input", true, "Input File/Directory");
         options.addOption("o", "output", true, "Output CSV File");
@@ -36,8 +44,9 @@ public class DNSLatency {
             System.exit(1);
         }
 
-        File inputFile = new File(cmd.hasOption("input") ? cmd.getOptionValue("input") : "csv/");
-        String outputFilePath;
+        if (cmd.hasOption("input"))
+            inputFile = new File(cmd.getOptionValue("input"));
+
         if (cmd.hasOption("output"))
             outputFilePath = cmd.getOptionValue("output");
         else {
@@ -46,7 +55,15 @@ public class DNSLatency {
             String suffix = df.format(now);
             outputFilePath = "csv/DNSQueries__" + suffix + ".csv";
         }
+    }
 
+    /**
+     * Чтение логов в формате CSV.
+     * Если ранее подан файл, читается только он.
+     * Если подана директория (по умолчанию), из неё читаются рекурсивно файлы CSV.
+     */
+    private static void readCsv()
+    throws IOException {
         if (inputFile.isDirectory())
         {
             Files.walk(inputFile.toPath())
@@ -63,44 +80,71 @@ public class DNSLatency {
         {
             PingTimeMeasure.readCsv(inputFile.toPath());
         }
+    }
 
+    /**
+     * Используя консольный ввод, запрашивается количество серверов, которые введёт пользователь.
+     * 
+     * @return Количество серверов на проверку производительности.
+     */
+    private static int requestIpQueryNum() {
         try (Scanner scanner = new Scanner(System.in)) {
-            int ipQueryNum;
             System.out.println("Введите число серверов DNS:");
             while (true) {
                 try {
-                    ipQueryNum = Integer.parseInt(scanner.next());
-                    break;
+                    return Integer.parseInt(scanner.next());
                 }
                 catch (NumberFormatException e) {
                     System.out.println("Введите корректное число!");
                 }
             }
-
-            try {
-                for (int i = 1; i <= ipQueryNum; i++) {
-                    System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
-                    String ip = scanner.next();
-                    PingResult query = PingTimeMeasure.findQuery(ip);
-                    if (query != null) {
-                        System.out.println("Сервер по адресу '" + ip + "' уже был протестирован. Его результат: " + query.time() + " мс.");
-                        System.out.println("Хотите сбросить результат? [y/N]");
-                        char answer = (char) System.in.read();
-                        if ((answer == 'Y') || (answer == 'y'))
-                            PingTimeMeasure.remove(ip);
-                        else
-                            continue;
-                    }
-                    System.out.println();
-                    PingTimeMeasure.add(ip);
-                }
-            } catch (InterruptedException | NoSuchElementException e) {
-                System.out.println("Зафиксировали прерывание, выходим.");
-            }
-            
         }
+    }
 
-        PingTimeMeasure.print();
-        PingTimeMeasure.writeToFile(outputFilePath);
+    /**
+     * Используя консольный ввод, запрашивается доменное имя сервера.
+     * Если сервер уже проходил тестирование, запрашивается разрешение на сброс результата.
+     * 
+     * @param i Порядковый номер сервера
+     * @return Строка доменного имени сервера, либо null
+     */
+    private static String requestDnsServer(int i) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
+            String ip = scanner.next();
+            PingResult query = PingTimeMeasure.findQuery(ip);
+            if (query != null) {
+                System.out.println("Сервер по адресу '" + ip + "' уже был протестирован. Его результат: " + query.time() + " мс.");
+                System.out.println("Хотите сбросить результат? [y/N]");
+                String answer = scanner.next();
+                if (answer.toLowerCase() == "y")
+                    PingTimeMeasure.remove(ip);
+                else
+                    return null;
+            }
+            return ip;
+        }
+    }
+    public static void main(String[] args)
+    throws IOException {
+        parseArgs(args);
+        readCsv();
+
+        int ipQueryNum = requestIpQueryNum();
+
+        try {
+            for (int i = 1; i <= ipQueryNum; i++) {
+                String ip = requestDnsServer(i);
+                System.out.println();
+                if (ip != null)
+                    PingTimeMeasure.add(ip);
+            }
+        } catch (InterruptedException | NoSuchElementException e) {
+            System.out.println("Зафиксировали прерывание, выходим.");
+        }
+        finally {
+            PingTimeMeasure.print();
+            PingTimeMeasure.writeToFile(outputFilePath);
+        }
     }
 }
