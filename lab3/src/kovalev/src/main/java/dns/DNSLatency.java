@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -28,14 +29,29 @@ public class DNSLatency {
     private static File inputFile = new File("csv/");
     private static String outputFilePath = "csv/DNSQueries__" + getCurrentDate() + ".csv";
     private static PingTimeList log = new PingTimeList();
+    private static boolean checkListOnly = false;
+    private static String[] ipToCheck = new String[0];
 
     /**
-     * @return Текущая дата в формате "yyyy-dd-MM_HH-mm-ss".
+     * @return Текущая дата в формате "yyyy-MM-dd_HH-mm-ss".
      */
     private static String getCurrentDate() {
-        DateFormat df = new SimpleDateFormat("yyyy-dd-MM_HH-mm-ss");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         Date now = Calendar.getInstance().getTime();
         return df.format(now);
+    }
+
+    /**
+     * @param list Строка формата [el1,el2,...]
+     * @return Список из строк el1, el2, ...
+     */
+    public static String[] extractListElements(String list) {
+        String[] matches = Pattern.compile("[\\[,](.+?)(?=[\\],])")
+                                  .matcher(list)
+                                  .results()
+                                  .map(match -> match.group(1))
+                                  .toArray(String[]::new);
+        return matches;
     }
 
     /**
@@ -47,6 +63,7 @@ public class DNSLatency {
     private static void parseArgs(String[] args) {
         Options options = new Options();
         options.addOption("i", "input", true, "Input File/Directory");
+        options.addOption("l", "list", true, "List of Domains for Test; ex. '[localhost;8.8.8.8;1.1.1.1;ya.ru]'");
         options.addOption("o", "output", true, "Output CSV File");
 
         CommandLineParser parser = new DefaultParser();
@@ -61,10 +78,15 @@ public class DNSLatency {
             System.exit(1);
         }
 
+        if (cmd.hasOption("list"))
+            ipToCheck = extractListElements(cmd.getOptionValue("list"));
         if (cmd.hasOption("input"))
             inputFile = new File(cmd.getOptionValue("input"));
         if (cmd.hasOption("output"))
             outputFilePath = cmd.getOptionValue("output");
+
+        if (cmd.hasOption("list") && !cmd.hasOption("input"))
+            checkListOnly = true;
     }
 
     /**
@@ -72,7 +94,7 @@ public class DNSLatency {
      * 
      * @param path Путь, по которому находится CSV-таблица.
      */
-    public static void readCsv(Path path)
+    private static void readCsv(Path path)
     throws IOException {
         File csvData = path.toFile();
         if (!csvData.exists() || csvData.isDirectory())
@@ -131,8 +153,7 @@ public class DNSLatency {
         while (true) {
             try {
                 return Integer.parseInt(sc.next());
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 System.out.println("Введите корректное число!");
             }
         }
@@ -147,7 +168,7 @@ public class DNSLatency {
      * @return Строка доменного имени сервера, либо null
      */
     private static String requestDnsServer(Scanner sc, int i) {
-        System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
+        System.out.println("Введите адрес сервера DNS #" + String.valueOf(i) + ":");
         String ip = sc.next();
         PingResult query = log.findQuery(ip);
         if (query != null) {
@@ -198,22 +219,28 @@ public class DNSLatency {
         parseArgs(args);
         readCsvRecursive();
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            int ipQueryNum = requestIpQueryNum(scanner);
-            try {
-                for (int i = 1; i <= ipQueryNum; i++) {
-                    System.out.println();
-                    String ip = requestDnsServer(scanner, i);
-                    if (ip != null)
-                        log.add(ip);
-                }
-            } catch (InterruptedException | NoSuchElementException e) {
-                System.out.println("Зафиксировали прерывание, выходим.");
-            } finally {
-                printQueriesTable();
-                saveQueriesCsv();
+        try {
+            for (String ip : ipToCheck) {
+                System.out.println("[" + ip + "] Измеряем...");
+                log.add(ip);
             }
+
+            if (!checkListOnly) {
+                try (Scanner scanner = new Scanner(System.in)) {
+                    int ipQueryNum = requestIpQueryNum(scanner);
+                    for (int i = 1; i <= ipQueryNum; i++) {
+                        System.out.println();
+                        String ip = requestDnsServer(scanner, i);
+                        if (ip != null)
+                            log.add(ip);
+                    }
+                }
+            }
+        } catch (InterruptedException | NoSuchElementException e) {
+            System.out.println("Зафиксировали прерывание, выходим.");
+        } finally {
+            printQueriesTable();
+            saveQueriesCsv();
         }
-        
     }
 }

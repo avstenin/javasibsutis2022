@@ -1,6 +1,6 @@
 package dns;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
@@ -9,12 +9,10 @@ import org.junit.Test;
  */
 public class AppTest 
 {
-    /**
-     * Rigorous Test :-)
-     */
     @Test
-    public void shouldAnswerWithTrue()
+    public void correctListExtraction()
     {
-        assertTrue( true );
+        String[] tokens = DNSLatency.extractListElements("[208,1.1.1.1,ya.ru,localhost]");
+        assertArrayEquals(new String[]{"208", "1.1.1.1", "ya.ru", "localhost"}, tokens);
     }
 }

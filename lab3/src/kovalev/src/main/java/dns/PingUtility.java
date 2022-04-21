@@ -66,6 +66,7 @@ public final class PingUtility
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         int exitSuccess = proc.waitFor();
         if (exitSuccess != 0) {
+            System.err.print("[" + ip + "] ");
             System.err.println("Утилита вернула код " + Integer.toString(exitSuccess) + ".");
         }
 
@@ -81,15 +82,18 @@ public final class PingUtility
                 packetsReceived++;
             }
             else if (s.contains(sendFail)) {
+                System.err.print("[" + ip + "] ");
                 System.err.println("Не удалось найти сервер по адресу '" + ip + "'. Сервер пропущен.");
                 return Optional.empty();
             }
         }
 
         if (packetsReceived == 0) {
+            System.err.print("[" + ip + "] ");
             System.err.println("Запросы на сервер '" + ip + "' остались безответными. Сервер пропущен.");
             return Optional.empty();
         } else if (packetsReceived < packetNum) {
+            System.err.print("[" + ip + "] ");
             System.err.println(Integer.toString(packetNum - packetsReceived) + " из " + Integer.toString(packetNum) + " пакетов были потеряны.");
         }
 
