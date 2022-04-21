@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -18,10 +20,14 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 public class DNSLatency {
     private static File inputFile = new File("csv/");
     private static String outputFilePath = "csv/DNSQueries__" + getCurrentDate() + ".csv";
+    private static PingTimeList log = new PingTimeList();
 
     /**
      * @return Текущая дата в формате "yyyy-dd-MM_HH-mm-ss".
@@ -62,27 +68,55 @@ public class DNSLatency {
     }
 
     /**
-     * Чтение логов в формате CSV.
+     * Чтение файла логов по пути path с результатами Ping в формате CSV.
+     * 
+     * @param path Путь, по которому находится CSV-таблица.
+     */
+    public static void readCsv(Path path)
+    throws IOException {
+        File csvData = path.toFile();
+        if (!csvData.exists() || csvData.isDirectory())
+            return;
+        
+        try (CSVParser parser = CSVParser.parse(csvData, Charset.defaultCharset(), CSVFormat.Builder.create(CSVFormat.DEFAULT).setDelimiter(";").build()))
+        {
+            for (CSVRecord csvRecord : parser) {
+                String ip = csvRecord.get(0);
+                log.add(ip, Float.parseFloat(csvRecord.get(1)));
+            }
+        }
+    }
+
+    /**
+     * Рекурсивное чтение логов в формате CSV.
      * Если ранее подан файл, читается только он.
      * Если подана директория (по умолчанию), из неё читаются рекурсивно файлы CSV.
      */
-    private static void readCsv()
-    throws IOException {
+    private static void readCsvRecursive()
+    {
         if (inputFile.isDirectory())
         {
-            Files.walk(inputFile.toPath())
-                 .filter(name -> name.toString().endsWith(".csv"))
-                 .forEach(t -> {
-                    try {
-                        PingTimeMeasure.readCsv(t);
-                    } catch (IOException e) {
-                        System.out.println(e.getMessage());
-                    }
-                 });
+            try {
+                Files.walk(inputFile.toPath())
+                     .filter(name -> name.toString().endsWith(".csv"))
+                     .forEach(t -> {
+                        try {
+                            readCsv(t);
+                        } catch (IOException e) {
+                            System.err.println(e.getMessage());
+                        }
+                    });
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
         }
         else
         {
-            PingTimeMeasure.readCsv(inputFile.toPath());
+            try {
+                readCsv(inputFile.toPath());
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
         }
     }
 
@@ -115,13 +149,13 @@ public class DNSLatency {
     private static String requestDnsServer(Scanner sc, int i) {
         System.out.println("Введите адрес сервера DNS" + String.valueOf(i) + ":");
         String ip = sc.next();
-        PingResult query = PingTimeMeasure.findQuery(ip);
+        PingResult query = log.findQuery(ip);
         if (query != null) {
             System.out.println("Сервер по адресу '" + ip + "' уже был протестирован. Его результат: " + query.getTime() + " мс.");
             System.out.println("Хотите сбросить результат? [y/N]");
             String answer = sc.next();
             if (answer.toLowerCase() == "y")
-                PingTimeMeasure.remove(ip);
+                log.remove(ip);
             else
                 return null;
         }
@@ -136,7 +170,7 @@ public class DNSLatency {
         System.out.println();
         System.out.println(header);
         System.out.println("-".repeat(header.length()));
-        for (PingResult result : PingTimeMeasure.getQueriesLog())
+        for (PingResult result : log.getQueriesLog())
             System.out.println(result.toString());
     }
 
@@ -144,7 +178,7 @@ public class DNSLatency {
      * Сохраняет результаты в файл вывода в формате CSV.
      */
     private static void saveQueriesCsv() {
-        PingResult[] queriesLog = PingTimeMeasure.getQueriesLog();
+        PingResult[] queriesLog = log.getQueriesLog();
         if ((queriesLog.length == 0) || outputFilePath.isEmpty())
             return;
 
@@ -162,7 +196,7 @@ public class DNSLatency {
     public static void main(String[] args)
     throws IOException {
         parseArgs(args);
-        readCsv();
+        readCsvRecursive();
 
         try (Scanner scanner = new Scanner(System.in)) {
             int ipQueryNum = requestIpQueryNum(scanner);
@@ -171,7 +205,7 @@ public class DNSLatency {
                     System.out.println();
                     String ip = requestDnsServer(scanner, i);
                     if (ip != null)
-                        PingTimeMeasure.add(ip);
+                        log.add(ip);
                 }
             } catch (InterruptedException | NoSuchElementException e) {
                 System.out.println("Зафиксировали прерывание, выходим.");

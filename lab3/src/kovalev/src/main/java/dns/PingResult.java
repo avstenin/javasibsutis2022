@@ -2,9 +2,9 @@ package dns;
 
 public class PingResult implements Comparable<PingResult> {
     private String ip;
-    private Double time;
+    private Float time;
 
-    public PingResult(String ip, Double time) {
+    public PingResult(String ip, float time) {
         this.ip = ip;
         this.time = time;
     }
@@ -19,7 +19,7 @@ public class PingResult implements Comparable<PingResult> {
         return this.time.compareTo(o.time);
     }
 
-    public Double getTime() {
+    public float getTime() {
         return time;
     }
 
