@@ -55,23 +55,38 @@ public class Lab3 {
     }
 
     private static ArrayList<String> getAdresses(){
-        System.out.println("Укажите файл со списком адерсов или введте R для ручного ввода");
-        System.out.println("введите английскую H для поиска истории");
         Scanner scanner = new Scanner(System.in);
         String tmp;
         boolean manual = false;
+        boolean exit = false;
         try {
-            tmp = scanner.nextLine();
-            if (tmp.length() == 1){
-                if(tmp.charAt(0) == 'R')
-                    return getAdressesManual();
-                if(tmp.charAt(0) == 'H'){
-                    getHistory();
-                    return null;
+            while(!exit) {
+                System.out.println("Укажите файл со списком адерсов или введте R для ручного ввода");
+                System.out.println("введите английскую H для поиска истории, или Z для выхода");
+                tmp = scanner.nextLine();
+                if (tmp.length() == 1) {
+                    if (tmp.charAt(0) == 'R') {
+                        exit = true;
+                        return getAdressesManual();
+                    }
+                    if (tmp.charAt(0) == 'H') {
+                        exit = true;
+                        getHistory();
+                        return null;
+                    }
+                    if (tmp.charAt(0) == 'Z') {
+                        exit = true;
+                    }
+                } else {
+                    ArrayList<String> a = getAdressesFile(tmp);
+                    if (a != null) {
+                        exit = true;
+                        return a;
+                    }
+                    else {
+                        System.out.println("ошибка! файл не найден");
+                    }
                 }
-            }
-            else{
-                return getAdressesFile(tmp);
             }
 
         } catch (Exception e) {
@@ -115,6 +130,9 @@ public class Lab3 {
 
         ArrayList<String> adresses  = new ArrayList<String>();
         File file = findFile(new File(System.getProperty("user.dir")), name);
+        if(file == null){
+            return null;
+        }
 
         FileReader fileReader = new FileReader(file);
         BufferedReader br = new BufferedReader(fileReader);
