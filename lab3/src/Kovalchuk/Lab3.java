@@ -1,6 +1,7 @@
 package Kovalchuk;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -106,6 +107,12 @@ public class Lab3 {
     }
 
     private static ArrayList<String> getAdressesFile (String name) throws FileNotFoundException{
+        //пример тестового файла
+        //77.88.8.7
+        //8.8.8.8
+        //8.8.4.4
+        //ssssssssssssss
+
         ArrayList<String> adresses  = new ArrayList<String>();
         File file = findFile(new File(System.getProperty("user.dir")), name);
 
@@ -161,34 +168,41 @@ public class Lab3 {
     }
 
     private static Time checkTime(String address) throws IOException {
-        ArrayList<String> strings = new ArrayList<String>();
-        ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "ping " + address);
-        builder.redirectErrorStream(true);
-        Process p = builder.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        while (true) {
-            line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            strings.add(line);
-        }
-        p.destroy();
+//        ArrayList<String> strings = new ArrayList<String>();
+//        ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "ping " + address);
+//        builder.redirectErrorStream(true);
+//        Process p = builder.start();
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//        String line;
+//        while (true) {
+//            line = reader.readLine();
+//            if (line == null) {
+//                break;
+//            }
+//            strings.add(line);
+//        }
+//        p.destroy();
+//        Time time = new Time();
+//        time.address = address;
+//        int t = 0;
+//        int pos = 0;
+//        for (String i : strings) {
+//            pos = i.indexOf("Average");
+//            if(pos < 0) continue;
+//            pos += 10;
+//            while(Character.isDigit(i.charAt(pos))){
+//                t = t*10 + Character.getNumericValue(i.charAt(pos));
+//                pos++;
+//            }
+//            break;
+//        }
+//        time.time = t;
         Time time = new Time();
         time.address = address;
-        int t = 0;
-        int pos = 0;
-        for (String i : strings) {
-            pos = i.indexOf("Average");
-            if(pos < 0) continue;
-            pos += 10;
-            while(Character.isDigit(i.charAt(pos))){
-                t = t*10 + Character.getNumericValue(i.charAt(pos));
-                pos++;
-            }
-            break;
-        }
+        int t = (int) System.currentTimeMillis();
+        InetAddress a = InetAddress.getByName(address);
+        a.isReachable(10000);
+        t = (int)System.currentTimeMillis() - t;
         time.time = t;
         return time;
     }
