@@ -21,7 +21,7 @@ $ mvn package assembly:single
 
 Далее достаточно будет запустить этот пакет:
 ```sh
-$ java -jar ./kovalev-lab3-jar-with-dependencies.jar
+$ java -jar ./target/kovalev-lab3-jar-with-dependencies.jar
 ```
 
 ### Аргументы

@@ -1,11 +1,14 @@
-package dns;
+package dns_test;
+
+import dns.DNSLatency;
+import dns.ListParsingError;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-public class ListParsing 
+public class ListParsing
 {
     @Test
     public void correctListExtraction()
