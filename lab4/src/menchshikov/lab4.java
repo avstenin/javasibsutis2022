@@ -35,6 +35,46 @@ class Operators {
     }
 }
 
+class Services extends Operators {
+    private int internet4g;
+    private int internet5g;
+    private int internetDist;
+
+    public Services() {
+    }
+
+    public Services(String operatorsName, int operatorCode, int internet4g, int internet5g, int internetDist) {
+        super(operatorsName, operatorCode);
+        this.internet4g = internet4g;
+        this.internet5g = internet5g;
+        this.internetDist = internetDist;
+    }
+
+    public int getInternet4g() {
+        return this.internet4g;
+    }
+
+    public void setInternet4g(int internet4g) {
+        this.internet4g = internet4g;
+    }
+
+    public int getInternet5g() {
+        return this.internet5g;
+    }
+
+    public void setInternet5g(int internet5g) {
+        this.internet5g = internet5g;
+    }
+
+    public int getInternetDist() {
+        return this.internetDist;
+    }
+
+    public void setInternetDist(int internetDist) {
+        this.internetDist = internetDist;
+    }
+}
+
 class lab4 {
     public static File searchFile(File directory, String filename) {
         File result = null;
@@ -52,8 +92,8 @@ class lab4 {
         return result;
     }
 
-    public static ArrayList<Operators> FileInput(String filename) throws FileNotFoundException {
-        ArrayList<Operators> operators = new ArrayList<Operators>();
+    public static ArrayList<Services> FileInput(String filename) throws FileNotFoundException {
+        ArrayList<Services> services = new ArrayList<Services>();
         File file = searchFile(new File(System.getProperty("user.dir")), filename);
         if (file == null)
             return null;
@@ -67,33 +107,58 @@ class lab4 {
                 if (line == null)
                     break;
                 String[] values = line.split(";");
-                operators.add(new Operators(values[0], Integer.parseInt(values[1])));
+                services.add(new Services(values[0], Integer.parseInt(values[1]), Integer.parseInt(values[2]),
+                        Integer.parseInt(values[3]), Integer.parseInt(values[4])));
             }
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("File read error");
         }
 
-        return operators;
+        return services;
     }
 
-    public static void printOperators(ArrayList<Operators> operators) {
+    public static void printOperators(ArrayList<Services> operators) {
         System.out.printf("%18s %11s\n", "Name", "Code");
         for (Operators ops : operators) {
             System.out.printf("%18s %11s\n", ops.getOperatorsName(), ops.getOperatorCode());
         }
     }
 
+    public static void printServices(ArrayList<Services> services) {
+        System.out.printf("%18s %11s %10s %10s %20s\n", "Name", "Code", "4G", "5G", "Inernet Distribution");
+        for (Services serv : services) {
+            if (serv.getInternet4g() == 0) {
+                System.out.printf("%18s %11s %10s %10s %18s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        "-", serv.getInternet5g(), serv.getInternetDist());
+            } else if (serv.getInternet5g() == 0) {
+                System.out.printf("%18s %11s %10s %10s %18s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        serv.getInternet4g(), "-", serv.getInternetDist());
+            } else if (serv.getInternetDist() == 0) {
+                System.out.printf("%18s %11s %10s %10s %18s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        serv.getInternet4g(), serv.getInternet5g(), "-");
+            } else {
+                System.out.printf("%18s %11s %10s %10s %18s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        serv.getInternet4g(), serv.getInternet5g(), serv.getInternetDist());
+            }
+        }
+    }
+
     public static void RunApplication() throws IOException {
         Scanner sc = new Scanner(System.in);
-        ArrayList<Operators> operators;
-        operators = FileInput("ops.csv");
+        ArrayList<Services> services;
+        services = FileInput("ops.csv");
 
         while (true) {
-            System.out.println("Choose an action: \n" + "\t1.Show all operators \n" + "\t2. \n");
+            System.out.println(
+                    "Choose an action: \n" + "\t1.Show all operators \n" + "\t2.Show all operators with services \n");
             int firstInput = sc.nextInt();
             if (firstInput == 1) {
-                printOperators(operators);
+                printOperators(services);
+                System.out.println("\nPress Enter to continue...");
+                System.in.read();
+            } else if (firstInput == 2) {
+                printServices(services);
                 System.out.println("\nPress Enter to continue...");
                 System.in.read();
             } else {
