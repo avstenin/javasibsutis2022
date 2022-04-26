@@ -4,6 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 
 class Operators {
@@ -109,6 +112,12 @@ class lab4 {
                 String[] values = line.split(";");
                 services.add(new Services(values[0], Integer.parseInt(values[1]), Integer.parseInt(values[2]),
                         Integer.parseInt(values[3]), Integer.parseInt(values[4])));
+                services.sort(new Comparator<Services>() {
+                    @Override
+                    public int compare(Services o1, Services o2) {
+                        return o1.getInternet4g() - o2.getInternet4g();
+                    }
+                });
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -155,6 +164,12 @@ class lab4 {
                         serv.getInternet4g());
             }
         } else if (serviceNumber == 2) {
+            services.sort(new Comparator<Services>() {
+                @Override
+                public int compare(Services o1, Services o2) {
+                    return o1.getInternet5g() - o2.getInternet5g();
+                }
+            });
             for (Services serv : services) {
                 if (serv.getInternet5g() == 0) {
                     continue;
@@ -162,7 +177,13 @@ class lab4 {
                 System.out.printf("%18s %11s %10s\n", serv.getOperatorsName(), serv.getOperatorCode(),
                         serv.getInternet5g());
             }
-        } else if (serviceNumber == 2) {
+        } else if (serviceNumber == 3) {
+            services.sort(new Comparator<Services>() {
+                @Override
+                public int compare(Services o1, Services o2) {
+                    return o1.getInternetDist() - o2.getInternetDist();
+                }
+            });
             for (Services serv : services) {
                 if (serv.getInternetDist() == 0) {
                     continue;
@@ -181,8 +202,12 @@ class lab4 {
         while (true) {
             System.out.println(
                     "Choose an action: \n" + "\t1.Show all operators \n" + "\t2.Show all operators with services \n"
-                            + "\t3.Show operators with a specific service\n");
+                            + "\t3.Show operators with a specific service\n" + "\t4.Exit");
             int firstInput = sc.nextInt();
+            if (firstInput < 1 || firstInput > 4) {
+                System.out.println("Enter correct action number");
+                continue;
+            }
             if (firstInput == 1) {
                 printOperators(services);
                 System.out.println("\nPress Enter to continue...");
@@ -197,7 +222,7 @@ class lab4 {
                 printSpecificServices(services, serviceNumber);
                 System.out.println("\nPress Enter to continue...");
                 System.in.read();
-            } else {
+            } else if (firstInput == 4) {
                 break;
             }
         }
