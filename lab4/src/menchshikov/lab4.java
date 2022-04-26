@@ -144,6 +144,35 @@ class lab4 {
         }
     }
 
+    public static void printSpecificServices(ArrayList<Services> services, int serviceNumber) {
+        System.out.printf("%18s %11s %10s\n", "Name", "Code", "Coast");
+        if (serviceNumber == 1) {
+            for (Services serv : services) {
+                if (serv.getInternet4g() == 0) {
+                    continue;
+                }
+                System.out.printf("%18s %11s %10s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        serv.getInternet4g());
+            }
+        } else if (serviceNumber == 2) {
+            for (Services serv : services) {
+                if (serv.getInternet5g() == 0) {
+                    continue;
+                }
+                System.out.printf("%18s %11s %10s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        serv.getInternet5g());
+            }
+        } else if (serviceNumber == 2) {
+            for (Services serv : services) {
+                if (serv.getInternetDist() == 0) {
+                    continue;
+                }
+                System.out.printf("%18s %11s %10s\n", serv.getOperatorsName(), serv.getOperatorCode(),
+                        serv.getInternetDist());
+            }
+        }
+    }
+
     public static void RunApplication() throws IOException {
         Scanner sc = new Scanner(System.in);
         ArrayList<Services> services;
@@ -151,7 +180,8 @@ class lab4 {
 
         while (true) {
             System.out.println(
-                    "Choose an action: \n" + "\t1.Show all operators \n" + "\t2.Show all operators with services \n");
+                    "Choose an action: \n" + "\t1.Show all operators \n" + "\t2.Show all operators with services \n"
+                            + "\t3.Show operators with a specific service\n");
             int firstInput = sc.nextInt();
             if (firstInput == 1) {
                 printOperators(services);
@@ -159,6 +189,12 @@ class lab4 {
                 System.in.read();
             } else if (firstInput == 2) {
                 printServices(services);
+                System.out.println("\nPress Enter to continue...");
+                System.in.read();
+            } else if (firstInput == 3) {
+                System.out.println("Choose a service:\n" + "\t1.4G\n" + "\t2.5G\n" + "\t3.Internet Distribution");
+                int serviceNumber = sc.nextInt();
+                printSpecificServices(services, serviceNumber);
                 System.out.println("\nPress Enter to continue...");
                 System.in.read();
             } else {
