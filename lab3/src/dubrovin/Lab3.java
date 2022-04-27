@@ -232,7 +232,7 @@ public class Lab3 {
         serializeAddresses();
     }
 
-    public static void Lab3(String[] args) {
+    public static void main(String[] args) {
         new Lab3().run(args);
     }
 }
