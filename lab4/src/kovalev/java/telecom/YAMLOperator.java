@@ -33,9 +33,9 @@ public class YAMLOperator {
                       .map(tariff -> new Tariff(operatorName,
                                                 tariff.getName(),
                                                 tariff.getMonthRub(),
-                                                tariff.getInternetGB(),
-                                                tariff.getCallMinutes(),
-                                                tariff.getSms()))
+                                                (tariff.getInternetGB() == null) ? Double.POSITIVE_INFINITY : tariff.getInternetGB(),
+                                                (tariff.getCallMinutes() == null) ? Double.NEGATIVE_INFINITY : tariff.getCallMinutes(),
+                                                (tariff.getSms() == null) ? Double.NEGATIVE_INFINITY : tariff.getSms()))
                       .toArray(Tariff[]::new);
     }
 }
