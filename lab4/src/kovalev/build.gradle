@@ -1,0 +1,32 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = 'telecom.CLI'
+
+sourceSets {
+    main.java.srcDirs = ['java']
+    test.java.srcDirs = ['../../test/kovalev/java']
+}
+
+//tag::repositories[]
+repositories {
+    mavenCentral()
+}
+//end::repositories[]
+
+//tag::jar[]
+jar {
+    archiveBaseName = 'kovalev'
+    archiveVersion = 'lab4'
+}
+//end::jar[]
+
+//tag::dependencies[]
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    testImplementation "junit:junit:4.13"
+}
+//end::dependencies[]
