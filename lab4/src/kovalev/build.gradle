@@ -32,6 +32,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.2"
     testImplementation "junit:junit:4.13"
 }
 //end::dependencies[]
@@ -46,5 +47,9 @@ tasks.register('uberJar', Jar) {
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 //end::tasks[]
