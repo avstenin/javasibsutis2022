@@ -1,0 +1,22 @@
+operatorName: 'Тинькофф Мобайл'
+tariffs:
+  - name: 'Минимальный интернет, Без минут'
+    monthRub: 219
+    internetGB: 5
+    callMinutes: null
+    sms: null
+  - name: 'Минимальный интернет, 400 мин'
+    monthRub: 349
+    internetGB: 5
+    callMinutes: 400
+    sms: null
+  - name: 'Безлимитный интернет, Без минут'
+    monthRub: 1099
+    internetGB: Infinity
+    callMinutes: null
+    sms: null
+  - name: 'Безлимитный интернет, 400 мин'
+    monthRub: 1299
+    internetGB: Infinity
+    callMinutes: 400
+    sms: null

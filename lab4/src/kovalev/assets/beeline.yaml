@@ -1,0 +1,22 @@
+operatorName: 'Билайн'
+tariffs:
+  - name: 'Твоё решение'
+    monthRub: 330
+    internetGB: 15
+    callMinutes: 300
+    sms: null
+  - name: 'Близкие люди 1'
+    monthRub: 370
+    internetGB: 25
+    callMinutes: 400
+    sms: 300
+  - name: 'Близкие люди 2'
+    monthRub: 470
+    internetGB: 35
+    callMinutes: 600
+    sms: 300
+  - name: 'На максимум!'
+    monthRub: 1800
+    internetGB: 60
+    callMinutes: 3000
+    sms: 300

@@ -1,0 +1,22 @@
+operatorName: 'МТС'
+tariffs:
+  - name: 'Smart'
+    monthRub: 288
+    internetGB: 5
+    callMinutes: 250
+    sms: 250
+  - name: 'НЕТАРИФ'
+    monthRub: 370
+    internetGB: 15
+    callMinutes: 300
+    sms: 50
+  - name: 'Тарифище'
+    monthRub: 473
+    internetGB: 35
+    callMinutes: 600
+    sms: 600
+  - name: 'ULTRA'
+    monthRub: 1900
+    internetGB: 60
+    callMinutes: 3500
+    sms: 1000

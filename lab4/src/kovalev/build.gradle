@@ -6,6 +6,7 @@ mainClassName = 'telecom.CLI'
 
 sourceSets {
     main.java.srcDirs = ['java']
+    main.resources.srcDirs = ['assets']
     test.java.srcDirs = ['../../test/kovalev/java']
 }
 
@@ -30,3 +31,16 @@ dependencies {
     testImplementation "junit:junit:4.13"
 }
 //end::dependencies[]
+
+//tag::tasks[]
+tasks.register('uberJar', Jar) {
+    archiveClassifier = 'uber'
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+//end::tasks[]
