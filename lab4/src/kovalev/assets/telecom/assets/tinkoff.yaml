@@ -12,11 +12,11 @@ tariffs:
     sms: null
   - name: 'Безлимитный интернет, Без минут'
     monthRub: 1099
-    internetGB: Infinity
+    internetGB: .inf
     callMinutes: null
     sms: null
   - name: 'Безлимитный интернет, 400 мин'
     monthRub: 1299
-    internetGB: Infinity
+    internetGB: .inf
     callMinutes: 400
     sms: null

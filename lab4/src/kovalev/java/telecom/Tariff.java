@@ -13,7 +13,7 @@ public class Tariff {
     private String operatorName;
     private String tariffName;
     private Integer monthRub;
-    private Integer internetGB;
+    private Double internetGB;
     private Integer callMinutes;
     private Integer sms;
 
