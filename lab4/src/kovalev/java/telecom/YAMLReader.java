@@ -32,7 +32,7 @@ public class YAMLReader {
         ArrayList<YAMLOperator> opList = new ArrayList<YAMLOperator>();
         try {
             Files.walk(yamlFolder)
-                 .filter(name -> name.toString().endsWith(".csv"))
+                 .filter(name -> name.toString().endsWith(".yaml"))
                  .forEach(t -> {
                     try {
                         opList.add(readYaml(t.toFile()));

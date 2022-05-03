@@ -12,9 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 class YAMLTariff {
-    private String tariffName;
+    private String name;
     private Integer monthRub;
-    private Double internetGB;
+    private Integer internetGB;
     private Integer callMinutes;
     private Integer sms;
 }
@@ -31,7 +31,7 @@ public class YAMLOperator {
     {
         return tariffs.stream()
                       .map(tariff -> new Tariff(operatorName,
-                                                tariff.getTariffName(),
+                                                tariff.getName(),
                                                 tariff.getMonthRub(),
                                                 tariff.getInternetGB(),
                                                 tariff.getCallMinutes(),
