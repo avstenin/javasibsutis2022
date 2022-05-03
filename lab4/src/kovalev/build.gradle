@@ -24,6 +24,14 @@ repositories {
 jar {
     archiveBaseName = 'kovalev'
     archiveVersion = 'lab4'
+
+    manifest {
+        attributes(
+            'Main-Class': 'telecom.CLI',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+        )
+    }
 }
 //end::jar[]
 
@@ -40,6 +48,8 @@ dependencies {
 
 //tag::tasks[]
 tasks.register('uberJar', Jar) {
+    duplicatesStrategy = 'include'
+
     archiveClassifier = 'uber'
 
     from sourceSets.main.output
@@ -47,6 +57,14 @@ tasks.register('uberJar', Jar) {
     dependsOn configurations.runtimeClasspath
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+
+    manifest {
+        attributes(
+            'Main-Class': 'telecom.CLI',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+        )
     }
 }
 
