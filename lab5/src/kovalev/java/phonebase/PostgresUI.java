@@ -41,12 +41,11 @@ public class PostgresUI implements DBUI {
         }
     }
 
-    @Override
-    public PhoneRecord[] selectAll()
+    private PhoneRecord[] getRecords(String query)
     throws SQLException {
         List<PhoneRecord> records = new ArrayList<>();
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM PhoneBook")) {
+             ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 records.add(new PhoneRecord(rs.getString("FirstName"),
                                             rs.getString("LastName"),
@@ -58,20 +57,32 @@ public class PostgresUI implements DBUI {
     }
 
     @Override
-    public PhoneRecord findByName(String name) {
-        // TODO Auto-generated method stub
-        return null;
+    public PhoneRecord[] selectAll()
+    throws SQLException {
+        return getRecords(String.format("SELECT * FROM PhoneBook"));
     }
 
     @Override
-    public PhoneRecord findByPhone(String phone) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public PhoneRecord findByEmail(String email) {
-        // TODO Auto-generated method stub
-        return null;
+    public PhoneRecord[] find(String firstName, String lastName, String phone, String email)
+    throws SQLException {
+        int n = 0;
+        String query = "SELECT * FROM PhoneBook ";
+        if (firstName != null) {
+            query += (n++ == 0) ? "WHERE " : "AND ";
+            query += String.format("FirstName == '%s' ", firstName);
+        }
+        if (lastName != null) {
+            query += (n++ == 0) ? "WHERE " : "AND ";
+            query += String.format("LastName == '%s' ", lastName);
+        }
+        if (phone != null) {
+            query += (n++ == 0) ? "WHERE " : "AND ";
+            query += String.format("Phone == '%s' ", phone);
+        }
+        if (phone != null) {
+            query += (n++ == 0) ? "WHERE " : "AND ";
+            query += String.format("EMail == '%s' ", email);
+        }
+        return getRecords(query);
     }
 }
