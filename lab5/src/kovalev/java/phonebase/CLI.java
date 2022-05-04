@@ -32,6 +32,7 @@ public class CLI
             return null;
         }
     }
+
     public static void main(String[] args) {
         Connection connection = connectToPostgres();
 
