@@ -79,7 +79,7 @@ public class PostgresUI implements DBUI {
             query += (n++ == 0) ? "WHERE " : "AND ";
             query += String.format("Phone = '%s' ", phone);
         }
-        if (phone != null) {
+        if (email != null) {
             query += (n++ == 0) ? "WHERE " : "AND ";
             query += String.format("EMail = '%s' ", email);
         }
