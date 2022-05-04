@@ -10,7 +10,6 @@ mainClassName = 'phonebase.CLI'
 
 sourceSets {
     main.java.srcDirs = ['java']
-    test.java.srcDirs = ['../../test/kovalev/java']
 }
 
 //tag::repositories[]
@@ -21,7 +20,7 @@ repositories {
 
 //tag::jar[]
 jar {
-    archiveBaseName = 'kovalev.lab5'
+    archiveBaseName = 'kovalev-lab5'
     archiveVersion = '1.0'
 
     manifest {
@@ -46,7 +45,6 @@ targetCompatibility = 1.8
 
 dependencies {
     implementation 'org.postgresql:postgresql:42.3.4'
-    testImplementation "junit:junit:4.13"
 }
 //end::dependencies[]
 
