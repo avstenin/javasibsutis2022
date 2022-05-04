@@ -1,7 +1,7 @@
 DROP USER IF EXISTS pbuser;
 DROP DATABASE IF EXISTS phonedb;
 
-CREATE USER pbuser;
+CREATE USER pbuser WITH PASSWORD 'pbpwd';
 CREATE DATABASE phonedb;
 GRANT ALL PRIVILEGES ON DATABASE phonedb TO pbuser;
 
@@ -12,5 +12,5 @@ CREATE TABLE PhoneBook(
     FirstName varchar(50) not null,
     LastName varchar(50) not null,
     Phone varchar(50) not null,
-    EMail varchar(50) not null
+    EMail varchar(50)
 );
