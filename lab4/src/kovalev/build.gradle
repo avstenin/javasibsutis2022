@@ -22,8 +22,8 @@ repositories {
 
 //tag::jar[]
 jar {
-    archiveBaseName = 'kovalev'
-    archiveVersion = 'lab4'
+    archiveBaseName = 'kovalev-lab4'
+    archiveVersion = '1.0'
 
     manifest {
         attributes(
@@ -36,8 +36,11 @@ jar {
 //end::jar[]
 
 //tag::dependencies[]
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
 
 dependencies {
     implementation "commons-cli:commons-cli:1.5.0"
