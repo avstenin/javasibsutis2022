@@ -34,6 +34,12 @@ jar {
 }
 //end::jar[]
 
+//tag::run[]
+run {
+    standardInput = System.in
+}
+//end::run[]
+
 //tag::dependencies[]
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

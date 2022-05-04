@@ -69,19 +69,19 @@ public class PostgresUI implements DBUI {
         String query = "SELECT * FROM PhoneBook ";
         if (firstName != null) {
             query += (n++ == 0) ? "WHERE " : "AND ";
-            query += String.format("FirstName == '%s' ", firstName);
+            query += String.format("FirstName = '%s' ", firstName);
         }
         if (lastName != null) {
             query += (n++ == 0) ? "WHERE " : "AND ";
-            query += String.format("LastName == '%s' ", lastName);
+            query += String.format("LastName = '%s' ", lastName);
         }
         if (phone != null) {
             query += (n++ == 0) ? "WHERE " : "AND ";
-            query += String.format("Phone == '%s' ", phone);
+            query += String.format("Phone = '%s' ", phone);
         }
         if (phone != null) {
             query += (n++ == 0) ? "WHERE " : "AND ";
-            query += String.format("EMail == '%s' ", email);
+            query += String.format("EMail = '%s' ", email);
         }
         return getRecords(query);
     }

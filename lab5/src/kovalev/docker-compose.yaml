@@ -3,6 +3,7 @@ services:
   postgres:
     image: postgres:14.2
     environment:
+      POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "su.scrt.pwd"
     volumes:
       - ./sql:/docker-entrypoint-initdb.d

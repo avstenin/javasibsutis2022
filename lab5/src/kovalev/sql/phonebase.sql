@@ -14,3 +14,5 @@ CREATE TABLE PhoneBook(
     Phone varchar(50) not null,
     EMail varchar(50)
 );
+GRANT ALL PRIVILEGES ON TABLE PhoneBook TO pbuser;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO pbuser;
