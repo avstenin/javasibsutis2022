@@ -19,15 +19,14 @@ public class PostgresUI implements DBUI {
     }
     private Connection connection;
 
-    @Override
-    public void connect()
+    public PostgresUI()
     throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
         connection = DriverManager.getConnection(dbUrl, dbCredentials);
     }
 
     @Override
-    public void closeConnection()
+    public void close()
     throws SQLException {
         connection.close();
     }
