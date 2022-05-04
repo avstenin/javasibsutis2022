@@ -1,0 +1,76 @@
+plugins {
+    id "io.freefair.lombok" version "6.4.3"
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = 'phonebase.CLI'
+
+sourceSets {
+    main.java.srcDirs = ['java']
+}
+
+//tag::repositories[]
+repositories {
+    mavenCentral()
+}
+//end::repositories[]
+
+//tag::jar[]
+jar {
+    archiveBaseName = 'kovalev-lab5'
+    archiveVersion = '1.0'
+
+    manifest {
+        attributes(
+            'Main-Class': 'phonebase.CLI',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+        )
+    }
+}
+//end::jar[]
+
+//tag::run[]
+run {
+    standardInput = System.in
+}
+//end::run[]
+
+//tag::dependencies[]
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    implementation 'org.postgresql:postgresql:42.3.4'
+}
+//end::dependencies[]
+
+//tag::tasks[]
+tasks.register('uberJar', Jar) {
+    duplicatesStrategy = 'include'
+
+    archiveClassifier = 'uber'
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+
+    manifest {
+        attributes(
+            'Main-Class': 'phonebase.CLI',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+        )
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+//end::tasks[]

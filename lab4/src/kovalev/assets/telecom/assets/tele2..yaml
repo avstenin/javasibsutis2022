@@ -1,0 +1,22 @@
+operatorName: 'Tele2'
+tariffs:
+  - name: 'Мой разговор'
+    monthRub: 300
+    internetGB: 10
+    callMinutes: 250
+    sms: null
+  - name: 'Мой онлайн'
+    monthRub: 350
+    internetGB: 20
+    callMinutes: 400
+    sms: null
+  - name: 'Black'
+    monthRub: 800
+    internetGB: 50
+    callMinutes: 1000
+    sms: 100
+  - name: 'Premium'
+    monthRub: 1500
+    internetGB: 60
+    callMinutes: 2000
+    sms: 500
