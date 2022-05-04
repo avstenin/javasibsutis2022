@@ -1,0 +1,32 @@
+operatorName: 'Мегафон'
+tariffs:
+  - name: 'Минимум'
+    monthRub: 250
+    internetGB: 10
+    callMinutes: 100
+    sms: null
+  - name: 'Интернет'
+    monthRub: 400
+    internetGB: 20
+    callMinutes: 250
+    sms: null
+  - name: 'Звонки'
+    monthRub: 400
+    internetGB: 7
+    callMinutes: 600
+    sms: null
+  - name: 'Максимум'
+    monthRub: 670
+    internetGB: 45
+    callMinutes: 900
+    sms: 300
+  - name: 'VIP'
+    monthRub: 1000
+    internetGB: 50
+    callMinutes: 1500
+    sms: 300
+  - name: 'Премиум'
+    monthRub: 2000
+    internetGB: 60
+    callMinutes: 5000
+    sms: 300
