@@ -40,8 +40,11 @@ run {
 //end::run[]
 
 //tag::dependencies[]
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
 
 dependencies {
     implementation 'org.postgresql:postgresql:42.3.4'
