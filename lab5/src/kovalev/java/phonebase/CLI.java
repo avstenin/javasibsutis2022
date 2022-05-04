@@ -1,6 +1,5 @@
 package phonebase;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class CLI
@@ -8,9 +7,8 @@ public class CLI
     public static void main(String[] args) {
         DBUI dbui = new PostgresUI();
 
-        Connection connection;
         try {
-            connection = dbui.connect();
+            dbui.connect();
         } catch (ClassNotFoundException e) {
             System.err.println("PostgreSQL JDBC Driver не найден.");
             e.printStackTrace();
@@ -21,8 +19,12 @@ public class CLI
             return;
         }
 
-        if (connection != null) {
-            System.err.println("Соединение удалось!");
+        System.out.println("Соединение удалось!");
+
+        try {
+            dbui.closeConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

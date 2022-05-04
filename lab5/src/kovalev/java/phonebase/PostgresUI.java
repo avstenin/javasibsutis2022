@@ -13,12 +13,19 @@ public class PostgresUI implements DBUI {
         dbCredentials.put("user", "pbuser");
         dbCredentials.put("password", "pbpwd");
     }
+    private Connection connection;
 
     @Override
-    public Connection connect()
+    public void connect()
     throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
-        return DriverManager.getConnection(dbUrl, dbCredentials);
+        connection = DriverManager.getConnection(dbUrl, dbCredentials);
+    }
+
+    @Override
+    public void closeConnection()
+    throws SQLException {
+        connection.close();
     }
 
     @Override
@@ -50,5 +57,4 @@ public class PostgresUI implements DBUI {
         // TODO Auto-generated method stub
         return null;
     }
-    
 }
