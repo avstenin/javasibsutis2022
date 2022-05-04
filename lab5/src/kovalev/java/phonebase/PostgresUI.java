@@ -36,7 +36,7 @@ public class PostgresUI implements DBUI {
     throws SQLException {
         try (Statement stmt = connection.createStatement()) {
             for (PhoneRecord record : phoneRecords) {
-                stmt.executeUpdate("INSERT INTO phonedb " + record.sqlColumns() + " VALUES " + record.sqlValues() + ";");
+                stmt.executeUpdate("INSERT INTO PhoneBook " + record.sqlColumns() + " VALUES " + record.sqlValues() + ";");
             }
         }
     }
@@ -46,7 +46,7 @@ public class PostgresUI implements DBUI {
     throws SQLException {
         List<PhoneRecord> records = new ArrayList<>();
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM phonedb")) {
+             ResultSet rs = stmt.executeQuery("SELECT * FROM PhoneBook")) {
             while (rs.next()) {
                 records.add(new PhoneRecord(rs.getString("FirstName"),
                                             rs.getString("LastName"),
