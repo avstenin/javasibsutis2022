@@ -1,0 +1,6 @@
+operatorName,country,city,internetSpeed4G,internetSpeed5G,wireSpeed,cost
+Beeline,Russia,Moscow,100,200,300,600
+Beeline,Russia,Novosibirsk,0,100,200,400
+MTS,USA,New-York,400,500,0,1000
+YOTA,England,London,200,0,300,500
+Tele2,USA,New-York,0,0,0,0
