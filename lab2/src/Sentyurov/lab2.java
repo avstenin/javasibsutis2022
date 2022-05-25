@@ -42,6 +42,7 @@ class dns_info implements Comparable<dns_info>{
 public class lab2 {
 
     public static int dns_count = 0;
+    private final static int packetNumber = 4;
 
     public static void main(String[] args) throws Exception {
         ArrayList<dns_info> dns = new ArrayList<>();
@@ -71,7 +72,9 @@ public class lab2 {
         addresses.add(result);
         String answer;
         ArrayList<String> answers = new ArrayList<>();
-        ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd C:/windows/system32 && ping " + result);
+        //ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd C:/windows/system32 && ping " + result);
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+        ProcessBuilder builder = new ProcessBuilder("ping", isWindows ? "-n" : "-c", String.valueOf(packetNumber), result);
         builder.redirectErrorStream(true);
         Process process = builder.start();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
