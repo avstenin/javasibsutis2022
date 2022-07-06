@@ -1,8 +1,6 @@
 package com.company;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -70,6 +68,7 @@ public class lab3 {
                     break;
                 case 2: //ввод с файла
                     System.out.println("You choose input from file");
+                    file_input(dns, addresses, read);
                     menu();
                     break;
                 case 3: //история
@@ -100,25 +99,77 @@ public class lab3 {
     public static void keyboard_input(ArrayList<dns_info> dns, ArrayList<String> addresses, Scanner read) throws Exception {
         System.out.print("How many DNS addresses you need to ping: ");
         dns_count = read.nextInt(); //ввод количества днс адресов
+        String addr;
 
         for(int i = 0; i < dns_count; i++){
             System.out.println("\nPlease input "+(i+1)+" IP-address:");
-            get_ping(read.next(), dns, addresses); //получение адреса и вызов ф-ции пингования
+            addr = read.next();
+            System.out.println("Please wait");
+            get_ping(addr, dns, addresses); //получение адреса и вызов ф-ции пингования
         }
 
         Collections.sort(dns, Collections.reverseOrder()); //сортировака результатов
         System.out.println("\nProgram result:");
 
-        for (dns_info out_dns: dns){
-            System.out.printf("IP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping()); //вывод результатов после сортировки
+        for (dns_info out_dns: dns){ //вывод результатов после сортировки
+            System.out.printf("IP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping());
         }
         System.out.println("\nIf any of IP address is gone, that's mean that all packets were lost");
-        create_record(dns,addresses); //создание лога
+        create_record(dns,addresses, "|From keyboard|"); //создание лога
         dns_count = 0;
     }
 
+    public static void file_input(ArrayList<dns_info> dns, ArrayList<String> addresses, Scanner read) throws Exception {
+        System.out.println("Enter the full path of file: ");
+        String filename = read.next(); //чтение имени файла
+        File fileReader = new File(filename); //открытие файла
+
+        while (!fileReader.exists()){ //если файл с указанным именем не существует
+            System.out.println("No such file in directory. Try again.\n");
+            filename = read.next(); //читаем имя файла снова
+            fileReader = new File(filename);
+        }
+
+        try(BufferedReader reader = new BufferedReader(new FileReader(fileReader))){ //получаем содержимое файла
+            ArrayList<String> file_addresses = new ArrayList<>(); //массив адресов в файле
+            String line;
+
+            while((line = reader.readLine()) != null){ //пока файл не пустой
+                // if (проверка строки) { если строка подходит под адрес
+                   dns_count++;
+                   file_addresses.add(line); //добавляем в массив адресов
+            }
+
+            if(dns_count > 0) {
+                System.out.println("Addresses, found in file to be pinged:\n");
+                for (int i = 0; i < dns_count; i++) { //вывод найденных адресов
+                    System.out.println(file_addresses.get(i));
+                }
+                System.out.print("\n");
+
+                System.out.println("Start pinging\n");
+                for (int i = 0; i < dns_count; i++) { //пингование найденных адресов
+                    System.out.println("Pinging address #" + (i + 1) + " (" + file_addresses.get(i) + ")");
+                    get_ping(file_addresses.get(i), dns, addresses);
+                }
+
+                Collections.sort(dns, Collections.reverseOrder()); //сортировака результатов
+                System.out.println("\nProgram result:");
+
+                for (dns_info out_dns: dns){ //вывод результатов после сортировки
+                    System.out.printf("IP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping());
+                }
+                System.out.println("\nIf any of IP address is gone, that's mean that all packets were lost");
+                create_record(dns,addresses, "|From file " + filename + '|'); //создание лога
+                dns_count = 0;
+            }
+            else{
+                System.out.println("No matching addresses were found in file, or file is empty");
+            }
+        }
+    }
+
     public static void get_ping(String result, ArrayList<dns_info> dns, ArrayList<String> addresses) throws Exception {
-        System.out.println("Please wait");
         addresses.add(result);
         String answer;
         ArrayList<String> answers = new ArrayList<>(); //список с результатами пингования
@@ -144,14 +195,14 @@ public class lab3 {
         }
     }
 
-    public static void create_record(ArrayList<dns_info> dns, ArrayList<String> addresses) throws  Exception {
+    public static void create_record(ArrayList<dns_info> dns, ArrayList<String> addresses, String type_input) throws  Exception {
         boolean write_flag = false;
         int count = 0;
         System.out.println("\nCreating new file with record");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd_MMMM_yyyy_HH_mm_ss"); //создание формата даты
         String current_time = dateTimeFormatter.format(LocalDateTime.now()); //получение текущей даты
          try (FileWriter fileWriter = new FileWriter("log_"+current_time+".txt");) { //создание файла с нужным названием
-            fileWriter.write("Date of ping: " + current_time + '\n'); //занесение даты в файл
+            fileWriter.write("Date of ping: " + current_time + ". Type of input - " + type_input +  "\n"); //занесение даты в файл
             for (String checking_dns : addresses) { //в адресах содержатся все адреса для пингования
                 write_flag = false; //обнуление флага записи
                 for(dns_info success_dns: dns) { //в успешных адресах содержатся только те адреса, от которых пришел ответ
