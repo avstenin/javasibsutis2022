@@ -1,6 +1,8 @@
 package com.company;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -49,30 +51,34 @@ class dns_info implements Comparable<dns_info>{
 public class lab3 {
 
     public static int dns_count = 0; //кол-во адресов
+    public static int file_count = 0; //счетчик файлов в директории
     private final static int packetNumber = 4; //кол-во запросов для пингования одного адреса
+
 
     public static void main(String[] args) throws Exception {
         ArrayList<dns_info> dns = new ArrayList<>(); //массив эл-тов класса днс
         ArrayList<String> addresses = new ArrayList<>(); //массив строк для ввода адресов
         Scanner read = new Scanner(System.in);
         int choice;
-        boolean flag = true;
+        boolean flag = true;;
         menu();
         while (flag){
+            System.out.print("\nNumber of operation: ");
             choice = read.nextInt();
             switch (choice) {
                 case 1: //ввод с клавиатуры
-                    System.out.println("You choose input from keyboard");
                     keyboard_input(dns, addresses, read);
+                    System.out.println("-----------------------------------\n");
                     menu();
                     break;
                 case 2: //ввод с файла
-                    System.out.println("You choose input from file");
                     file_input(dns, addresses, read);
+                    System.out.println("-----------------------------------\n");
                     menu();
                     break;
                 case 3: //история
-                    System.out.println("You choose watching history");
+                    view_history(read);
+                    System.out.println("-----------------------------------\n");
                     menu();
                     break;
                 case 4: //выход
@@ -81,19 +87,18 @@ public class lab3 {
                     break;
 
                 default: //другие случаи
-                    System.out.println("Invalid input, try again\n");
+                    System.out.println("Invalid input, try again");
                 }
         }
     }
 
     public static void menu() {
-        System.out.print("-----------------------------------------------\n" +
+        System.out.print(
                 "What do you want to do?\n\n" +
                 "1) Input DNS from keyboard\n" +
                 "2) Read DNS from file\n" +
                 "3) Watch history\n" +
-                "4) Exit\n\n" +
-                "Number of operation: ");
+                "4) Exit\n");
     }
 
     public static void keyboard_input(ArrayList<dns_info> dns, ArrayList<String> addresses, Scanner read) throws Exception {
@@ -104,6 +109,10 @@ public class lab3 {
         for(int i = 0; i < dns_count; i++){
             System.out.println("\nPlease input "+(i+1)+" IP-address:");
             addr = read.next();
+            while(!ip_check(addr)) {
+                System.out.println("Invalid ip-address. Try again.\n");
+                addr = read.next();
+            }
             System.out.println("Please wait");
             get_ping(addr, dns, addresses); //получение адреса и вызов ф-ции пингования
         }
@@ -120,7 +129,7 @@ public class lab3 {
     }
 
     public static void file_input(ArrayList<dns_info> dns, ArrayList<String> addresses, Scanner read) throws Exception {
-        System.out.println("Enter the full path of file: ");
+        System.out.print("Enter the full path of file: ");
         String filename = read.next(); //чтение имени файла
         File fileReader = new File(filename); //открытие файла
 
@@ -135,21 +144,22 @@ public class lab3 {
             String line;
 
             while((line = reader.readLine()) != null){ //пока файл не пустой
-                // if (проверка строки) { если строка подходит под адрес
-                   dns_count++;
-                   file_addresses.add(line); //добавляем в массив адресов
+                if (ip_check(line)) { //если строка подходит под адрес
+                    dns_count++;
+                    file_addresses.add(line); //добавляем в массив адресов
+                }
             }
 
             if(dns_count > 0) {
-                System.out.println("Addresses, found in file to be pinged:\n");
+                System.out.println("\nAddresses, found in file to be pinged:");
                 for (int i = 0; i < dns_count; i++) { //вывод найденных адресов
                     System.out.println(file_addresses.get(i));
                 }
                 System.out.print("\n");
 
-                System.out.println("Start pinging\n");
+                System.out.println("Start pinging");
                 for (int i = 0; i < dns_count; i++) { //пингование найденных адресов
-                    System.out.println("Pinging address #" + (i + 1) + " (" + file_addresses.get(i) + ")");
+                    System.out.println("\tPinging address #" + (i + 1) + " (" + file_addresses.get(i) + ")");
                     get_ping(file_addresses.get(i), dns, addresses);
                 }
 
@@ -157,7 +167,7 @@ public class lab3 {
                 System.out.println("\nProgram result:");
 
                 for (dns_info out_dns: dns){ //вывод результатов после сортировки
-                    System.out.printf("IP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping());
+                    System.out.printf("\tIP-address: %-15s server's answer time: %3d ms.\n", out_dns.show_address(), out_dns.show_ping());
                 }
                 System.out.println("\nIf any of IP address is gone, that's mean that all packets were lost");
                 create_record(dns,addresses, "|From file " + filename + '|'); //создание лога
@@ -165,6 +175,127 @@ public class lab3 {
             }
             else{
                 System.out.println("No matching addresses were found in file, or file is empty");
+            }
+        }
+    }
+
+    public static void view_history(Scanner read) throws IOException{
+        int choice;
+        boolean flag = true;
+        System.out.println("\nChose one:\n" +
+                "1) Show history of all files\n" +
+                "2) Show history in files filtered by date\n");
+
+        while(flag) {
+            System.out.print("Number of operation: ");
+            choice = read.nextInt();
+            switch (choice) {
+                case 1:
+                    show_all();
+                    flag = false;
+                    break;
+                case 2:
+                    show_by_filter(read);
+                    flag = false;
+                    break;
+                default:
+                    System.out.println("Invalid command. Try again\n");
+            }
+        }
+    }
+
+    public static void show_by_filter(Scanner read) throws IOException{
+        System.out.print("\nInput the date of log-file by next example 'dd_MM_YYYY': ");
+        String filter = read.next();
+
+        while(!date_check(filter)){
+            System.out.println("Invalid date. Try again.\n");
+            System.out.print("Input the date of log-file by next example 'dd_MM_YYYY': ");
+            filter = read.next();
+        }
+        dir_check(Paths.get("src"), filter, true);
+    }
+
+    public static void show_all() throws IOException{
+        dir_check(Paths.get("src"), "", false);
+    }
+
+    public static void dir_check(Path path, String filter, boolean flag) throws IOException{
+        ArrayList<Path> files = new ArrayList<>(); //список подходящих файлов
+        File directory = new File(path.toString()); //путь директории
+        File[] all_files = directory.listFiles(); //массив, хранящий все файлы в директории
+
+        for(int i = 0; i < all_files.length; i++) { //по всем файлам текущей директории
+            if (all_files[i].isFile()) { //если текущий элемент файл, НЕ ДИРЕКТОРИЯ
+                if(filename_check(all_files[i].getName())){ //и его имя соответствует регулярке программы (лог)
+                    files.add(all_files[i].toPath()); //добавление файла в список всех подходящих файлов
+                }
+            } else { //если директория - перейти в директорию и повторить
+                dir_check(Paths.get(all_files[i].toString()), filter, flag);
+            }
+        }
+
+        for(Path current_file: files){ //когда закончилась рекурсия, среди подходящий файлов
+            if(!flag){ //если показываем всю историю
+                fileReader(current_file); //вывод содержимого файла
+            } else if(current_file.toString().contains(filter)) { //если по фильтру и фильр пропускает
+                file_count++;
+                fileReader(current_file); // вывод содержимого файла
+            }
+        }
+
+        if(file_count == 0 && directory.toString().equals("src")){ //если в директории не было подходящих файлов
+            System.out.println("No matches found");
+        }
+        file_count = 0;
+    }
+
+    public static void fileReader(Path filename) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename.toString()))) {  //получаем содержимое файла
+            String line;
+            boolean all = true;
+            System.out.println("\n-------------------------------------------\n"+
+                    (++file_count) + ". Path of current file: " + filename.toString()); //вывод пути текущего файла
+            String firstLine = "Date of ping: " + filename.toString().substring(filename.toString().length() - 23, filename.toString().length() - 4); //создание первой строки
+            String[] pack_success = {"IP-address:", "server's answer time:", "ms"}; //создание капов для кооректных
+            String[] pack_failed = {"IP-address:", "ping unsuccessful: all packets were lost"}; // и не корректных ответов
+
+            ArrayList<String> allFile = new ArrayList<>(); //массив для вывода информации файла
+            line = reader.readLine();
+            if(line.contains(firstLine)) { //если первая строка совпадает
+                allFile.add(line);
+                while ((line = reader.readLine()) != null) { //получение строки
+                    boolean full1 = true, full2 = false;
+
+                    for (String str : pack_success) {
+                        if (!line.contains(str)) { //если не содержится элемент капа при успешном пинге
+                            full1 = false; //выход - несовпадение по строке (исход возможен)
+                            break;
+                        } else {
+                            full1 = true;
+                        }
+                    }
+                    for (String str : pack_failed) {
+                        if (!line.contains(str)) { //если не содержится элемент капа при провальном пинге
+                            full2 = false; //выход - несовпадение по строке (исход возможен)
+                            break;
+                        } else {
+                            full2 = true;
+                        }
+                    }
+                    if (full1 ^ full2) { //если как минимум один из двух капов в наличии
+                        allFile.add(line); //добавляем строку в итоговый вывод
+                    } else { //если строка не подходит
+                        System.out.println("\tFile structure corrupted");
+                        all = false;
+                        break;
+                    }
+                }
+            }
+            if(all){ //если все строки были прочтены и соотнесены успешно
+                for(String str : allFile){ //построчный вывод файла
+                    System.out.println(str);
+                }
             }
         }
     }
@@ -188,7 +319,7 @@ public class lab3 {
                 break;
         }
 
-        Pattern pattern = Pattern.compile(".+ \\= (\\d+)"); // [ = ddd...d]
+        Pattern pattern = Pattern.compile(".+ \\= (\\d+)"); // [... = ddd...d]
         Matcher matcher = pattern.matcher(answers.get(answers.size() - 1));
         if (matcher.find()) {
             dns.add(new dns_info(result, Integer.parseInt(matcher.group(1)))); //создание эл-та, если найден паттерн. если не найден - пакеты потеряны, эл-т не создается
@@ -199,9 +330,9 @@ public class lab3 {
         boolean write_flag = false;
         int count = 0;
         System.out.println("\nCreating new file with record");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd_MMMM_yyyy_HH_mm_ss"); //создание формата даты
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH_mm_ss"); //создание формата даты
         String current_time = dateTimeFormatter.format(LocalDateTime.now()); //получение текущей даты
-         try (FileWriter fileWriter = new FileWriter("log_"+current_time+".txt");) { //создание файла с нужным названием
+         try (FileWriter fileWriter = new FileWriter("src/log_"+current_time+".txt");) { //создание файла с нужным названием
             fileWriter.write("Date of ping: " + current_time + ". Type of input - " + type_input +  "\n"); //занесение даты в файл
             for (String checking_dns : addresses) { //в адресах содержатся все адреса для пингования
                 write_flag = false; //обнуление флага записи
@@ -221,6 +352,23 @@ public class lab3 {
                 fileWriter.write( "\tNothing was ping\n"); //запись в файл адреса без ответа
             }
         }
-        System.out.println("Record create success\n");
+        System.out.println("Record create success");
+    }
+
+    public static boolean ip_check(String line){
+        String regex = "((25[0-5]|2[0-4]\\d|[01]?\\d?\\d)(\\.)){3}" +
+                "(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)";
+        return Pattern.matches(regex, line);
+        //3 * (250 - 255 / 200 - 249 / 000 - 199 + .) + ((250 - 255 / 200 - 249 / 000 - 199)
+    }
+
+    public static boolean filename_check(String name){
+        String regex = "log_(0[1-9]|[1-2]\\d|3[01])_(0[1-9]|1[0-2])_(\\d{4})_([0-1]\\d|2[0-3])(_([0-5]\\d)){2}.txt";
+        return Pattern.matches(regex, name);
+    }
+
+    public static boolean date_check(String name){
+        String regex = "(0[1-9]|[1-2]\\d|3[01])_(0[1-9]|1[0-2])_(\\d{4})";
+        return Pattern.matches(regex, name);
     }
 }
