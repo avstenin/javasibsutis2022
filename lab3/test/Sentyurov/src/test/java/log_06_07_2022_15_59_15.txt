@@ -1,0 +1,2 @@
+Date of ping: 06_07_2022_15_59_15. Type of input - |From keyboard|
+	IP-address: 8.8.8.8 server's answer time: 104 ms.
